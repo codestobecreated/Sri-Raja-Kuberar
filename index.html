@@ -111,29 +111,6 @@ $('#home').innerHTML = `
   </div>
 </section>
 
-<!-- ============ HOW IT WORKS ============ -->
-<section class="relative night-bg text-white py-20 md:py-28 overflow-hidden">
-  <div class="absolute -right-48 -bottom-48 w-[40rem] h-[40rem] text-gold-400/10 animate-spin-slow">${mandala('w-full h-full')}</div>
-  <div class="relative max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-14 items-center">
-    <div>
-      <div class="reveal"><p class="eyebrow !text-gold-400">Your sacred journey</p><h2 class="font-display text-4xl md:text-5xl font-semibold gold-text mt-3 leading-tight">From sankalpam to prasadam, in four simple steps</h2>
-      <p class="text-stone-400 mt-4">No account needed – just your name, mobile number and an OTP.</p></div>
-      <ol class="mt-10 space-y-2">
-        ${[['Choose your pooja & package', 'Family, Pair or Single – with clear, discounted pricing.', 'diya'], ['Share sankalpam details', 'Name, nakshatra, rasi and gothram for each family member.', 'scroll'], ['Pay securely', 'UPI, cards, netbanking or international – INR, USD, SGD, MYR, AED.', 'shield'], ['Receive video & prasadam', 'Video proof on WhatsApp, prasadam couriered with tracking.', 'truck']].map((s, i) => `
-        <li class="reveal flex gap-5 p-4 rounded-2xl hover:bg-white/[.04] transition" style="transition-delay:${i * 100}ms">
-          <div class="relative shrink-0"><span class="w-14 h-14 rounded-full border border-gold-400/50 grid place-items-center text-gold-300">${ic(s[2], 'w-6 h-6')}</span>${i < 3 ? '<span class="absolute left-1/2 top-14 w-px h-8 bg-gold-400/30"></span>' : ''}</div>
-          <div><p class="text-xs text-gold-400 font-bold tracking-[.2em]">STEP 0${i + 1}</p><b class="block font-display text-2xl text-white mt-0.5">${s[0]}</b><p class="text-sm text-stone-400 mt-1">${s[1]}</p></div></li>`).join('')}
-      </ol>
-    </div>
-    <div class="relative reveal">
-      <div class="rounded-t-full rounded-b-[2rem] overflow-hidden border border-gold-400/30 aspect-[4/5] max-w-md mx-auto">${imgTag(IMG.aarti, 'w-full h-full object-cover', 'Evening aarti')}</div>
-      <div class="absolute -bottom-6 left-0 md:-left-4 rounded-2xl bg-ivory text-temple-900 p-4 shadow-soft flex items-center gap-3 max-w-[16rem]">
-        <span class="w-11 h-11 rounded-full bg-[#25D366] text-white grid place-items-center">${WA_ICON}</span><div><b class="text-sm">Video sent on WhatsApp</b><p class="text-xs text-stone-500">within 24 hrs of your pooja</p></div></div>
-      <div class="absolute top-10 right-0 md:-right-4 rounded-2xl bg-ivory text-temple-900 p-4 shadow-soft flex items-center gap-3"><span class="w-11 h-11 rounded-full bg-gold-100 text-gold-700 grid place-items-center">${ic('truck')}</span><div><b class="text-sm">Prasadam shipped</b><p class="text-xs text-stone-500">India & 18 countries</p></div></div>
-    </div>
-  </div>
-</section>
-
 <!-- ============ SPECIAL DAYS ============ -->
 <section class="paper-bg py-20 md:py-24">
   <div class="max-w-7xl mx-auto px-4">
@@ -159,6 +136,41 @@ $('#home').innerHTML = `
       <b class="font-display text-2xl text-temple-900">Upcoming streams</b>
       <ul class="mt-4 space-y-4 flex-1">${LIVE.map(l => `<li class="flex gap-3 items-center">${imgTag(l.img, 'w-20 h-16 rounded-xl object-cover')}<div><b class="text-sm text-temple-900 line-clamp-2">${esc(l.title)}</b><p class="text-xs ${l.live ? 'text-red-600 font-bold' : 'text-stone-500'} flex items-center gap-1 mt-0.5">${ic('clock', 'w-3.5 h-3.5')} ${l.when}</p></div></li>`).join('')}</ul>
       <button id="remind" class="btn btn-gold w-full mt-6">${ic('bell', 'w-4 h-4')} Remind me before streams</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ANNADHANAM / DONATION ============ -->
+<section class="paper-bg py-20 md:py-28">
+  <div class="max-w-7xl mx-auto px-4">
+    ${head('அன்னம் பரம்பிரம்மம் · Annam Param Brahmam', 'Step forward in divine giving', 'Food itself is the Supreme Divine. Contribute to annadhanam, goshala, education and the temple construction.')}
+    <div id="donations" class="grid lg:grid-cols-5 gap-6 mt-14 items-stretch"></div>
+    <div class="mt-10 rounded-[2rem] bg-gold-50 border border-gold-200 p-6 md:p-8 flex flex-wrap items-center justify-between gap-5 reveal">
+      <div class="flex items-center gap-4"><span class="w-14 h-14 rounded-2xl bg-gold-400 text-night-950 grid place-items-center">${ic('gift', 'w-7 h-7')}</span><div><b class="font-display text-2xl text-temple-900">Sponsor annadhanam on a special date</b><p class="text-sm text-stone-600">Birthday, anniversary or remembrance – receive photos of the seva on WhatsApp.</p></div></div>
+      <a href="donate.html" class="btn btn-green">Sponsor a date</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="relative night-bg text-white py-20 md:py-28 overflow-hidden">
+  <div class="absolute -right-48 -bottom-48 w-[40rem] h-[40rem] text-gold-400/10 animate-spin-slow">${mandala('w-full h-full')}</div>
+  <div class="relative max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-14 items-center">
+    <div>
+      <div class="reveal"><p class="eyebrow !text-gold-400">Your sacred journey</p><h2 class="font-display text-4xl md:text-5xl font-semibold gold-text mt-3 leading-tight">From sankalpam to prasadam, in four simple steps</h2>
+      <p class="text-stone-400 mt-4">No account needed – just your name, mobile number and an OTP.</p></div>
+      <ol class="mt-10 space-y-2">
+        ${[['Choose your pooja & package', 'Family, Pair or Single – with clear, discounted pricing.', 'diya'], ['Share sankalpam details', 'Name, nakshatra, rasi and gothram for each family member.', 'scroll'], ['Pay securely', 'UPI, cards, netbanking or international – INR, USD, SGD, MYR, AED.', 'shield'], ['Receive video & prasadam', 'Video proof on WhatsApp, prasadam couriered with tracking.', 'truck']].map((s, i) => `
+        <li class="reveal flex gap-5 p-4 rounded-2xl hover:bg-white/[.04] transition" style="transition-delay:${i * 100}ms">
+          <div class="relative shrink-0"><span class="w-14 h-14 rounded-full border border-gold-400/50 grid place-items-center text-gold-300">${ic(s[2], 'w-6 h-6')}</span>${i < 3 ? '<span class="absolute left-1/2 top-14 w-px h-8 bg-gold-400/30"></span>' : ''}</div>
+          <div><p class="text-xs text-gold-400 font-bold tracking-[.2em]">STEP 0${i + 1}</p><b class="block font-display text-2xl text-white mt-0.5">${s[0]}</b><p class="text-sm text-stone-400 mt-1">${s[1]}</p></div></li>`).join('')}
+      </ol>
+    </div>
+    <div class="relative reveal">
+      <div class="rounded-t-full rounded-b-[2rem] overflow-hidden border border-gold-400/30 aspect-[4/5] max-w-md mx-auto">${imgTag(IMG.aarti, 'w-full h-full object-cover', 'Evening aarti')}</div>
+      <div class="absolute -bottom-6 left-0 md:-left-4 rounded-2xl bg-ivory text-temple-900 p-4 shadow-soft flex items-center gap-3 max-w-[16rem]">
+        <span class="w-11 h-11 rounded-full bg-[#25D366] text-white grid place-items-center">${WA_ICON}</span><div><b class="text-sm">Video sent on WhatsApp</b><p class="text-xs text-stone-500">within 24 hrs of your pooja</p></div></div>
+      <div class="absolute top-10 right-0 md:-right-4 rounded-2xl bg-ivory text-temple-900 p-4 shadow-soft flex items-center gap-3"><span class="w-11 h-11 rounded-full bg-gold-100 text-gold-700 grid place-items-center">${ic('truck')}</span><div><b class="text-sm">Prasadam shipped</b><p class="text-xs text-stone-500">India & 18 countries</p></div></div>
     </div>
   </div>
 </section>
@@ -193,18 +205,6 @@ $('#home').innerHTML = `
     <div class="gold-line max-w-xs mx-auto mt-8"></div>
     <p class="mt-5 font-display text-2xl text-gold-200">Sri Navapasana Raja Murugan · Siddhar Peedam</p>
     <a href="about.html" class="btn btn-ghost mt-8">About the temple ${ic('arrow', 'w-4 h-4')}</a>
-  </div>
-</section>
-
-<!-- ============ ANNADHANAM / DONATION ============ -->
-<section class="bg-cream py-20 md:py-28">
-  <div class="max-w-7xl mx-auto px-4">
-    ${head('அன்னம் பரம்பிரம்மம் · Annam Param Brahmam', 'Step forward in divine giving', 'Food itself is the Supreme Divine. Contribute to annadhanam, goshala, education and the temple construction.')}
-    <div id="donations" class="grid lg:grid-cols-5 gap-6 mt-14 items-stretch"></div>
-    <div class="mt-10 rounded-[2rem] bg-gold-50 border border-gold-200 p-6 md:p-8 flex flex-wrap items-center justify-between gap-5 reveal">
-      <div class="flex items-center gap-4"><span class="w-14 h-14 rounded-2xl bg-gold-400 text-night-950 grid place-items-center">${ic('gift', 'w-7 h-7')}</span><div><b class="font-display text-2xl text-temple-900">Sponsor annadhanam on a special date</b><p class="text-sm text-stone-600">Birthday, anniversary or remembrance – receive photos of the seva on WhatsApp.</p></div></div>
-      <a href="donate.html" class="btn btn-green">Sponsor a date</a>
-    </div>
   </div>
 </section>
 
