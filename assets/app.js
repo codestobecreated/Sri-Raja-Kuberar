@@ -178,7 +178,7 @@ const NAV = [
   ['services', null, [['Special Darshan · சிறப்பு தரிசனம்', 'darshan.html'], ['Aarti · ஆர்த்தி', 'poojas.html?cat=aarti'], ['Pooja · பூஜை', 'poojas.html?cat=pooja'], ['Virtual Seva · மெய்நிகர் சேவை', 'poojas.html?cat=virtual'], ['Pooja Subscriptions', 'subscriptions.html'], ['Gift a Pooja', 'pooja.html?id=kubera-lakshmi&gift=1'], ['Prasadam Order', 'prasadam.html'], ['Festivals & Events', 'events.html']]],
   ['live', 'live.html'], ['shop', 'shop.html'],
   ['panchangam', null, [["Today's Panchangam", 'panchangam.html'], ['Special Days Calendar', 'calendar.html'], ['Nakshatra Remedy Finder', 'remedies.html'], ['Mantras & Slokas', 'mantras.html'], ['Articles', 'articles.html']]],
-  ['about', null, [['About Us & Swamigal', 'about.html'], ['Temples', 'temples.html'], ['Membership', 'membership.html'], ['Donate', 'donate.html'], ['Reviews', 'reviews.html'], ['FAQ', 'faq.html'], ['Contact', 'contact.html']]]
+  ['about', null, [['About the Temple', 'about.html'], ['Temples', 'temples.html'], ['Membership', 'membership.html'], ['Donate', 'donate.html'], ['Reviews', 'reviews.html'], ['FAQ', 'faq.html'], ['Contact', 'contact.html']]]
 ];
 function renderHeader() {
   const here = location.pathname.split('/').pop() || 'index.html', u = user();
@@ -187,7 +187,7 @@ function renderHeader() {
        <div class="absolute left-1/2 -translate-x-1/2 top-full pt-3 hidden group-hover:block z-50"><div class="bg-ivory rounded-2xl shadow-soft border border-sandal p-2 w-72">${sub.map(s => `<a href="${s[1]}" class="block px-4 py-2.5 rounded-xl text-sm hover:bg-temple-50 hover:text-temple-700">${s[0]}</a>`).join('')}</div></div></div>`
     : `<a href="${href}" class="relative px-2.5 py-2 whitespace-nowrap font-semibold hover:text-temple-600 ${here === href ? 'text-temple-700 after:absolute after:left-3 after:right-3 after:-bottom-0.5 after:h-0.5 after:bg-gold-400 after:rounded' : ''}">${t(k)}</a>`;
   const next = SPECIAL_DAYS.find(d => d.date >= new Date().toISOString().slice(0, 10));
-  const tick = `<span class="text-gold-300 font-tamil">ஓம் ஸ்ரீ ராஜ குபேராய நமஹ</span><span class="opacity-40">✦</span><span>${next ? `Next special day: <b class="text-gold-200">${next.type}</b> · ${fmtDate(next.date, { weekday: 'short', day: 'numeric', month: 'short' })}` : ''}</span><span class="opacity-40">✦</span><span>Video proof on WhatsApp for every pooja</span><span class="opacity-40">✦</span><span>Prasadam delivered across India & abroad</span><span class="opacity-40">✦</span>`;
+  const tick = `<span class="text-gold-300 font-tamil">ஓம் சரவணபவ</span><span class="opacity-40">✦</span><span>${next ? `Next special day: <b class="text-gold-200">${next.type}</b> · ${fmtDate(next.date, { weekday: 'short', day: 'numeric', month: 'short' })}` : ''}</span><span class="opacity-40">✦</span><span>Video proof on WhatsApp for every pooja</span><span class="opacity-40">✦</span><span>Prasadam delivered across India & abroad</span><span class="opacity-40">✦</span>`;
   $('#site-header').outerHTML = `
   <div class="bg-night-950 text-stone-300 text-xs">
     <div class="max-w-7xl mx-auto px-4 h-9 flex items-center gap-4">

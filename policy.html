@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Policies – Sri Raja Kuberar</title>
+<title>Policies – Sri Navapasana Raja Murugan</title>
 <link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
@@ -21,7 +21,7 @@ const P = {
   shipping: ['Shipping Policy', `<h2>Prasadam dispatch</h2><p>Prasadam is dispatched within 2 working days after the pooja date.</p><h2>Delivery time</h2><p>India: 3–7 working days. International: 10–20 working days, depending on customs.</p><h2>Charges</h2><p>Prasadam delivery is ₹99 within India. Products ship free on orders above ₹999. International rates are shown at checkout.</p><h2>Tracking</h2><p>A courier tracking number is sent on WhatsApp and SMS as soon as your parcel is dispatched, and is also visible on the Track Booking page.</p><h2>Damaged parcels</h2><p>Please share a photo on WhatsApp within 48 hours of delivery and we will reship.</p>`]
 };
 const k = P[qs('p')] ? qs('p') : 'terms';
-document.title = P[k][0] + ' – Sri Raja Kuberar';
+document.title = P[k][0] + ' – Sri Navapasana Raja Murugan';
 $('#hero').innerHTML = pageHero(P[k][0], 'Last updated: 1 November 2026', [[P[k][0]]]);
 $('#nav').innerHTML = Object.entries(P).map(([id, v]) => `<a href="policy.html?p=${id}" class="shrink-0 px-3 py-2 rounded-xl text-sm font-semibold ${id === k ? 'tab-active' : 'hover:bg-temple-50'}">${v[0]}</a>`).join('');
 $('#doc').innerHTML = P[k][1].replace(/<h2>/g, '<h2 class="font-display text-2xl text-temple-900 pt-2">');

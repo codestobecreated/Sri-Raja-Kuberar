@@ -8,6 +8,6 @@ self.addEventListener('fetch', e => {
   e.respondWith(fetch(e.request).then(r => { const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return r; }).catch(() => caches.match(e.request).then(r => r || caches.match('404.html'))));
 });
 self.addEventListener('push', e => {
-  const d = e.data ? e.data.json() : { title: 'Sri Raja Kuberar', body: 'Live stream starting now 🪔' };
+  const d = e.data ? e.data.json() : { title: 'Sri Navapasana Raja Murugan', body: 'Live stream starting now 🪔' };
   e.waitUntil(self.registration.showNotification(d.title, { body: d.body, icon: 'assets/logo.svg' }));
 });

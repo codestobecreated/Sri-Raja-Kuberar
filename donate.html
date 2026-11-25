@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Donate – Sri Raja Kuberar</title>
+<title>Donate – Sri Navapasana Raja Murugan</title>
 <link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
@@ -47,7 +47,7 @@ $('#n').value = user()?.name || ''; $('#m').value = user()?.mobile || '';
 function donate(cause, amount, extra = {}) {
   const d = { id: genId('DN'), cause, amount, name: $('#n').value || user()?.name || 'Devotee', contact: $('#anon').checked ? 'Anonymous' : ($('#n').value || user()?.name), mobile: $('#m').value || user()?.mobile, pan: $('#pan').value, monthly: $('#monthly').checked, method: 'upi', created: new Date().toISOString(), ...extra };
   const all = store.get('donations', []); all.unshift(d); store.set('donations', all);
-  modal(`<div class="p-8 text-center"><div class="text-6xl">🙏</div><h3 class="font-display text-2xl text-temple-900 mt-3">Thank you for your generosity</h3><p class="text-gray-600 mt-2">${rupee(amount)} towards ${esc(cause)}. May Sri Raja Kuberar bless your family.</p>
+  modal(`<div class="p-8 text-center"><div class="text-6xl">🙏</div><h3 class="font-display text-2xl text-temple-900 mt-3">Thank you for your generosity</h3><p class="text-gray-600 mt-2">${rupee(amount)} towards ${esc(cause)}. May Sri Navapasana Raja Murugan bless your family.</p>
     <a href="receipt.html?id=${d.id}&type=donation" target="_blank" class="btn btn-gold mt-5">🧾 Download receipt</a></div>`);
 }
 $('#f').onsubmit = e => { e.preventDefault(); donate($('#cause').selectedOptions[0].text, +$('#amt').value); };

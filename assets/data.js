@@ -21,21 +21,23 @@ const IMG = {
 const FALLBACK_IMG = IMG.temple;
 
 const SITE = {
-  name: 'Om Sri Raja Kubera Siddhar Peedam', name_ta: 'ஓம் ஸ்ரீ ராஜ குபேர சித்தர் பீடம்',
-  short: 'Sri Raja Kuberar', short_ta: 'ஸ்ரீ ராஜ குபேரர்',
-  phone: '+91 95144 43888', phoneRaw: '919514443888',
-  email: 'omsrirajakubera@gmail.com',
-  address: 'Chennai – Bengaluru National Highway, Vellagate, Kuberapattinam, Kanchipuram – 631502',
+  // Name, address, phone and map from the temple's Google Maps listing
+  name: 'Sri Navapasana Raja Murugan Temple (Siddhar Peedam)', name_ta: 'ஸ்ரீ நவபாஷாண ராஜ முருகன் கோயில் (சித்தர் பீடம்)',
+  short: 'Sri Navapasana Raja Murugan', short_ta: 'ஸ்ரீ நவபாஷாண ராஜ முருகன்',
+  phone: '+91 88255 56580', phoneRaw: '918825556580',
+  email: 'info@example.com', // TODO: replace with the temple's real email
+  address: 'SRD Royal City Annex, 24-25A, Murugan Kovil Street, North Poonamallee, Malayambakkam, Chennai, Tamil Nadu – 600123',
+  mapUrl: 'https://maps.app.goo.gl/RwVYhB1NcP7RzCFEA',
+  mapEmbed: 'https://maps.google.com/maps?q=13.0368352,80.0909403&z=16&output=embed',
   youtube: '' // e.g. 'https://www.youtube.com/embed/live_stream?channel=YOUR_CHANNEL_ID'
 };
 
 const TEMPLES = [
-  { id: 'kuberapattinam', name: 'Sri Raja Kuberar Temple', name_ta: 'ஸ்ரீ ராஜ குபேரர் கோயில்', city: 'Kanchipuram', img: IMG.temple, deity: 'Kuberar',
-    history: 'Om Sri Raja Kuberar Siddhar Peedam stands on the Chennai–Bengaluru National Highway at Vellagate in Kuberapattinam. Swamigal first built a small shrine for Raja Kuberar in an apartment in Ashok Nagar, Chennai, and with the blessings of devotees it has grown into a peedam that serves thousands through poojas and Annadhanam.' },
+  { id: 'poonamallee', name: 'Sri Navapasana Raja Murugan Temple', name_ta: 'ஸ்ரீ நவபாஷாண ராஜ முருகன் கோயில்', city: 'Poonamallee, Chennai', img: IMG.temple, deity: 'Murugan',
+    // SAMPLE TEXT – replace with the temple's own history
+    history: 'Sri Navapasana Raja Murugan Temple is a Siddhar Peedam on Murugan Kovil Street, North Poonamallee, Chennai. Lord Murugan is worshipped here in the Navapashanam tradition of the Siddhars – a sacred compound of nine minerals. Daily abhishekam, Sashti and Kiruthigai poojas and Annadhanam are performed for devotees.' },
   { id: 'varahi-salem', name: 'Sri Aadhi Varahi Temple', name_ta: 'ஸ்ரீ ஆதி வாராஹி கோயில்', city: 'Salem', img: IMG.slider[0], deity: 'Varahi',
-    history: 'A powerful shrine of Goddess Varahi near Vazhapadi, Salem, known for continuous yagnas and Chandi homams performed by experienced Vedic priests.' },
-  { id: 'ashoknagar', name: 'Raja Kuberar Shrine, Ashok Nagar', name_ta: 'ராஜ குபேரர் சன்னதி, அசோக் நகர்', city: 'Chennai', img: IMG.hero[1], deity: 'Kuberar',
-    history: 'The original shrine where Swamigal began daily worship of Raja Kuberar. Archanas and Lakshmi Kubera poojas are performed here every Friday.' }
+    history: 'A powerful shrine of Goddess Varahi near Vazhapadi, Salem, known for continuous yagnas and Chandi homams performed by experienced Vedic priests.' }
 ];
 
 const PRIESTS = [
@@ -51,17 +53,22 @@ const PKG = (f, fo, p, po, s, so) => [
 ];
 
 const POOJAS = [
+  { id: 'sashti-abhishekam', name: 'Sashti Navapashana Murugan Abhishekam', name_ta: 'சஷ்டி நவபாஷாண முருகன் அபிஷேகம்', temple: 'poonamallee', deity: 'Murugan', category: 'pooja',
+    tagline: 'Panchamirtha abhishekam to Lord Murugan on Sashti – for courage, health and victory over obstacles', date: '2026-11-29', time: '07:00 AM', cutoff: '2026-11-28', sankalpam: 'Name, Nakshatra & Rasi', img: IMG.hero[0], rating: 4.9, reviews: 264, booked: 1870,
+    pkgs: PKG(1501, 2200, 751, 1100, 451, 650), priest: 0, live: true,
+    benefits: [['Courage & Victory', 'Removes fear and obstacles with the grace of the Vel'], ['Health', 'Relief from long-standing ailments'], ['Child Blessing', 'Sashti vratham for santhana prapti'], ['Family Peace', 'Harmony and protection for the family']],
+    about: 'Sashti, the sixth day of the moon, is most sacred to Lord Murugan. Abhishekam with milk, honey, panchamirtham and vibhuti to the Navapashana Murugan is believed to remove obstacles and bless devotees with courage and good health.' },
   { id: 'sahasra-chandi', name: 'Karya Siddhi Sahasra Chandi Maha Yagna', name_ta: 'கார்ய சித்தி சஹஸ்ர சண்டி மகா யாகம்', temple: 'varahi-salem', deity: 'Durga', category: 'pooja',
     tagline: '48 days continuous yagna to remove all doshas and achieve success in all endeavours', date: '2026-12-15', time: '05:30 AM', cutoff: '2026-12-13', sankalpam: 'Vedic Archana', img: IMG.yagna, rating: 4.9, reviews: 312, booked: 2140,
     pkgs: PKG(3000, 5000, 1299, 2000, 799, 1000), priest: 0, live: true,
     benefits: [['Health & Vitality', 'Overcomes chronic illness, relieves stress, promotes longevity'], ['Wealth & Prosperity', 'Invokes Goddess Lakshmi for abundance and debt relief'], ['Career & Business', 'Clears obstacles in jobs, promotions and ventures'], ['Marriage Harmony', 'Resolves delays in matrimony and brings family unity']],
     about: 'Chandi is the fierce form of Adi Parasakthi combining Saraswati, Lakshmi and Parvati. Participating in a Chandi Yagam with sankalpam is believed to free one from doshas, fulfil righteous desires and bring peace, prosperity and success.' },
-  { id: 'kubera-lakshmi', name: 'Kubera Lakshmi Pooja', name_ta: 'குபேர லட்சுமி பூஜை', temple: 'kuberapattinam', deity: 'Kuberar', category: 'pooja',
+  { id: 'kubera-lakshmi', name: 'Kubera Lakshmi Pooja', name_ta: 'குபேர லட்சுமி பூஜை', temple: 'poonamallee', deity: 'Kuberar', category: 'pooja',
     tagline: 'For wealth, debt relief and prosperity in business', date: '2026-12-04', time: '06:00 PM', cutoff: '2026-12-03', sankalpam: 'Name & Nakshatra', img: IMG.hero[0], rating: 4.8, reviews: 528, booked: 5320,
     pkgs: PKG(1501, 2500, 801, 1200, 501, 750), priest: 1, live: false,
     benefits: [['Wealth', 'Blessings of Kuberar for steady income'], ['Debt Relief', 'Removes financial burdens'], ['Business Growth', 'New opportunities and customers'], ['Family Peace', 'Harmony at home']],
-    about: 'Lord Kubera is the treasurer of the Devas. Worshipping Raja Kuberar together with Mahalakshmi on a Friday or Pournami brings lasting wealth and removes debts.' },
-  { id: 'pradosham-abhishekam', name: 'Pradosham Shiva Abhishekam', name_ta: 'பிரதோஷ சிவ அபிஷேகம்', temple: 'kuberapattinam', deity: 'Shiva', category: 'pooja',
+    about: 'Lord Kubera is the treasurer of the Devas. Worshipping Lord Kubera together with Mahalakshmi on a Friday or Pournami brings lasting wealth and removes debts.' },
+  { id: 'pradosham-abhishekam', name: 'Pradosham Shiva Abhishekam', name_ta: 'பிரதோஷ சிவ அபிஷேகம்', temple: 'poonamallee', deity: 'Shiva', category: 'pooja',
     tagline: 'Abhishekam to Lord Shiva and Nandi during the sacred Pradosha kalam', date: '2026-12-02', time: '04:30 PM', cutoff: '2026-12-01', sankalpam: 'Name, Nakshatra & Gothram', img: IMG.hero[2], rating: 4.9, reviews: 401, booked: 3890,
     pkgs: PKG(1100, 1800, 601, 900, 351, 500), priest: 2, live: true,
     benefits: [['Removes Sins', 'Washes away karmic burdens'], ['Mental Peace', 'Calms the mind'], ['Health', 'Relief from ailments'], ['Moksha', 'Spiritual progress']],
@@ -71,22 +78,22 @@ const POOJAS = [
     pkgs: PKG(2100, 3200, 1100, 1600, 651, 900), priest: 2, live: false,
     benefits: [['Dosha Nivarthi', 'Removes graha doshas'], ['Career', 'Smooth progress'], ['Health', 'Protection'], ['Education', 'Focus for students']],
     about: 'Navagraha Shanti Homam is performed to propitiate the nine planets and reduce malefic effects shown in one\'s horoscope.' },
-  { id: 'annadhanam-archana', name: 'Annadhanam with Archana', name_ta: 'அன்னதானம் மற்றும் அர்ச்சனை', temple: 'kuberapattinam', deity: 'Kuberar', category: 'virtual',
+  { id: 'annadhanam-archana', name: 'Annadhanam with Archana', name_ta: 'அன்னதானம் மற்றும் அர்ச்சனை', temple: 'poonamallee', deity: 'Kuberar', category: 'virtual',
     tagline: '"Annam Param Brahmam" – feed devotees in your family name', date: '2026-12-07', time: '12:00 PM', cutoff: '2026-12-06', sankalpam: 'Name & Nakshatra', img: IMG.donation[1], rating: 5.0, reviews: 145, booked: 980,
     pkgs: PKG(2501, 3000, 1001, 1500, 501, 700), priest: 1, live: false,
     benefits: [['Punya', 'Highest merit of food offering'], ['Ancestors', 'Pitru blessings'], ['Prosperity', 'Abundance at home'], ['Joy', 'Blessings of many']],
     about: 'Giving food is a virtue; giving it with love is the highest virtue. Your sankalpam is chanted before the meal is served to devotees.' },
-  { id: 'aarti-special', name: 'Maha Deepa Aarti', name_ta: 'மகா தீப ஆரத்தி', temple: 'ashoknagar', deity: 'Kuberar', category: 'aarti',
+  { id: 'aarti-special', name: 'Maha Deepa Aarti', name_ta: 'மகா தீப ஆரத்தி', temple: 'poonamallee', deity: 'Murugan', category: 'aarti',
     tagline: 'Evening Maha Aarti with your sankalpam', date: '2026-12-05', time: '07:00 PM', cutoff: '2026-12-05', sankalpam: 'Name & Nakshatra', img: IMG.gallery[1], rating: 4.8, reviews: 88, booked: 620,
     pkgs: PKG(501, 800, 301, 450, 151, 250), priest: 1, live: true,
     benefits: [['Light', 'Removes darkness from life'], ['Peace', 'Calm household'], ['Protection', 'Wards off negativity'], ['Blessings', 'Daily grace']],
     about: 'The Maha Deepa Aarti is offered with ghee lamps and camphor while your names are recited before the deity.' },
-  { id: 'special-darshan', name: 'Special Darshan (VIP)', name_ta: 'சிறப்பு தரிசனம்', temple: 'kuberapattinam', deity: 'Kuberar', category: 'darshan',
+  { id: 'special-darshan', name: 'Special Darshan (VIP)', name_ta: 'சிறப்பு தரிசனம்', temple: 'poonamallee', deity: 'Murugan', category: 'darshan',
     tagline: 'Priority darshan with prasadam for devotees visiting in person', date: '2026-12-01', time: 'Daily slots', cutoff: '2026-12-31', sankalpam: 'Name', img: IMG.gallery[2], rating: 4.6, reviews: 75, booked: 1430,
     pkgs: PKG(1000, 1200, 500, 600, 250, 300), priest: 1, live: false,
     benefits: [['Priority', 'Short queue'], ['Prasadam', 'Special prasadam'], ['Archana', 'Name archana'], ['Peace', 'Unhurried darshan']],
     about: 'Book a time slot and receive a QR ticket. Show the QR at the entrance for priority darshan.' },
-  { id: 'kanakadhara-homam', name: 'Kanakadhara Homam', name_ta: 'கனகதாரா ஹோமம்', temple: 'ashoknagar', deity: 'Lakshmi', category: 'pooja',
+  { id: 'kanakadhara-homam', name: 'Kanakadhara Homam', name_ta: 'கனகதாரா ஹோமம்', temple: 'poonamallee', deity: 'Lakshmi', category: 'pooja',
     tagline: 'Recitation of Kanakadhara Stotram with homam for showers of gold', date: '2026-12-11', time: '08:00 AM', cutoff: '2026-12-10', sankalpam: 'Vedic Archana', img: IMG.slider[2], rating: 4.8, reviews: 156, booked: 870,
     pkgs: PKG(2500, 3500, 1300, 1800, 750, 1000), priest: 0, live: true,
     benefits: [['Gold & Wealth', 'Lakshmi kataksham'], ['Debt Free', 'Clears loans'], ['Home', 'Own house blessings'], ['Success', 'Fulfils desires']],
@@ -104,7 +111,7 @@ const REMEDIES = { // nakshatra index group -> pooja ids
 
 const SPECIAL_DAYS = [
   { date: '2026-11-27', type: 'Pradosham', ta: 'பிரதோஷம்', pooja: 'pradosham-abhishekam' },
-  { date: '2026-11-29', type: 'Sashti', ta: 'சஷ்டி', pooja: 'navagraha-shanti' },
+  { date: '2026-11-29', type: 'Sashti', ta: 'சஷ்டி', pooja: 'sashti-abhishekam' },
   { date: '2026-12-01', type: 'Ekadasi', ta: 'ஏகாதசி', pooja: 'kanakadhara-homam' },
   { date: '2026-12-02', type: 'Pradosham', ta: 'பிரதோஷம்', pooja: 'pradosham-abhishekam' },
   { date: '2026-12-04', type: 'Pournami', ta: 'பௌர்ணமி', pooja: 'kubera-lakshmi' },
@@ -124,13 +131,25 @@ const SUB_PLANS = [
   { id: 'all', name: 'All Four – Complete', ta: 'நான்கும் சேர்த்து', per: 'Monthly', price: 699, icon: '🪔', best: true }
 ];
 
+// Siddha products by Viralli Herbals Pharma (same address as the temple) – from the Justdial owner photos.
+// PRICES ARE PLACEHOLDERS – Justdial does not list prices. Update price / mrp / stock with the real values.
+const JD_IMG = n => `https://content.jdmagicbox.com/v2/comp/chennai/b4/044pxx44.xx44.221203033101.s8b4/catalogue/viralli-herbals-pharma-${n}.jpg?w=800&q=80`;
+const BRAND = { name: 'Viralli Herbals Pharma', logo: JD_IMG('malayambakkam-chennai-butter-distributors-glp2gmp1zd'), justdial: 'https://www.justdial.com/Chennai/Viralli-Herbals-Pharma-Srd-Roal-City-Annex-Malayambakkam/044PXX44-XX44-221203033101-S8B4_BZDET' };
+const SIDDHA_NOTE = 'Traditional Siddha medicine. Use as directed by a qualified Siddha physician.';
 const PRODUCTS = [
-  { id: 'rudraksha-5', name: '5 Mukhi Rudraksha Mala', ta: 'ஐந்து முக ருத்ராட்ச மாலை', price: 1499, mrp: 1999, img: IMG.service[0], cat: 'Rudraksha', stock: 24, desc: 'Energised 108+1 bead Panchamukhi rudraksha mala, blessed at the peedam.' },
-  { id: 'kubera-yantra', name: 'Sri Kubera Yantra (Copper)', ta: 'ஸ்ரீ குபேர யந்திரம்', price: 899, mrp: 1299, img: IMG.service[1], cat: 'Yantra', stock: 40, desc: 'Copper Kubera yantra energised during Kubera Lakshmi pooja. Place facing north.' },
-  { id: 'brass-lamp', name: 'Brass Kuthu Vilakku', ta: 'பித்தளை குத்து விளக்கு', price: 2499, mrp: 2999, img: IMG.service[2], cat: 'Lamps', stock: 12, desc: 'Traditional 5-face brass lamp, 12 inch.' },
-  { id: 'kubera-coin', name: 'Kubera Lakshmi Coin Set', ta: 'குபேர லட்சுமி நாணயம்', price: 399, mrp: 599, img: IMG.service[3], cat: 'Yantra', stock: 80, desc: 'Set of 2 blessed coins for your wallet and cash box.' },
-  { id: 'vibhuti', name: 'Sacred Vibhuti & Kumkum', ta: 'விபூதி குங்குமம்', price: 149, mrp: 199, img: IMG.service[4], cat: 'Prasadam', stock: 200, desc: 'Abhishekam vibhuti and kumkum from the sanctum.' },
-  { id: 'agal-set', name: 'Clay Agal Vilakku (Set of 12)', ta: 'அகல் விளக்கு', price: 299, mrp: 399, img: IMG.service[5], cat: 'Lamps', stock: 0, desc: 'Handmade clay lamps for Karthigai Deepam.' }
+  { id: 'kandankathiri-lehyam', name: 'Kandankathiri Lehyam', ta: 'கண்டங்கத்திரி லேகியம்', price: 350, mrp: 400, img: JD_IMG('kumaran-nagar-chennai-butter-distributors-ol7q60gf9g'), cat: 'Lehyam', stock: 30, desc: 'Siddha lehyam prepared with Kandankathiri (Solanum xanthocarpum). ' + SIDDHA_NOTE },
+  { id: 'prasava-lehyam', name: 'Prasava Lehyam', ta: 'பிரசவ லேகியம்', price: 350, mrp: 400, img: JD_IMG('malayambakkam-chennai-butter-distributors-bpdkkfwmj8'), cat: 'Lehyam', stock: 30, desc: 'Traditional Siddha lehyam for women after childbirth. ' + SIDDHA_NOTE },
+  { id: 'n-pain-cure-oil', name: 'N Pain Cure Oil (Spray)', ta: 'என் பெயின் க்யூர் ஆயில்', price: 250, mrp: 300, img: JD_IMG('kumaran-nagar-chennai-butter-distributors-k0yd5un868'), cat: 'Oil', stock: 40, desc: 'Herbal oil spray – as printed on the pack: relief from joint pain & body ache. For external use only.' },
+  { id: 'viralli-ghee', name: 'Viralli Ghee', ta: 'விரல்லி நெய்', price: 300, mrp: 350, img: JD_IMG('kumaran-nagar-chennai-butter-distributors-3qd0xx6b6x'), cat: 'Ghee', stock: 25, desc: 'Pure ghee from Viralli Herbals Pharma.' },
+  { id: 'k-cure-capsule', name: 'K Cure Capsule', ta: 'கே க்யூர் கேப்சூல்', price: 300, mrp: 350, img: JD_IMG('kumaran-nagar-chennai-butter-distributors-9r1uugdl6e'), cat: 'Capsules', stock: 40, desc: 'Siddha proprietary capsule. ' + SIDDHA_NOTE },
+  { id: 'viralli-liv-capsule', name: 'Viralli Liv Capsule', ta: 'விரல்லி லிவ் கேப்சூல்', price: 300, mrp: 350, img: JD_IMG('malayambakkam-chennai-physiotherapy-centres-88cntuisji'), cat: 'Capsules', stock: 40, desc: 'Siddha herbal capsule for liver care. ' + SIDDHA_NOTE },
+  { id: 'kazhacchikkai-capsule', name: 'Kazhacchikkai Capsule', ta: 'கழற்சிக்காய் கேப்சூல்', price: 250, mrp: 300, img: JD_IMG('kumaran-nagar-chennai-butter-distributors-apsfv7jniw'), cat: 'Capsules', stock: 40, desc: 'Capsules made with Kazhacchikkai (Caesalpinia bonduc). ' + SIDDHA_NOTE },
+  { id: 'avarampoo-capsule', name: 'Avarampoo Capsule', ta: 'ஆவாரம்பூ கேப்சூல்', price: 250, mrp: 300, img: JD_IMG('kumaran-nagar-chennai-butter-distributors-3jij2i7lxn'), cat: 'Capsules', stock: 40, desc: 'Capsules made with Avarampoo (Tanner\'s cassia flower). ' + SIDDHA_NOTE },
+  { id: 'triphala-capsule', name: 'Triphala Capsule', ta: 'திரிபலா கேப்சூல்', price: 250, mrp: 300, img: JD_IMG('kumaran-nagar-chennai-butter-distributors-t2uzwmgfju'), cat: 'Capsules', stock: 40, desc: 'Capsules of Triphala – amla, haritaki and bibhitaki. ' + SIDDHA_NOTE },
+  { id: 'triphala-choornam', name: 'Triphala Choornam', ta: 'திரிபலா சூரணம்', price: 120, mrp: 150, img: JD_IMG('kumaran-nagar-chennai-butter-distributors-pcsz776x2h'), cat: 'Choornam', stock: 50, desc: 'Triphala powder in a sealed pouch. ' + SIDDHA_NOTE },
+  { id: 'nellikkai-powder', name: 'Nellikkai Powder', ta: 'நெல்லிக்காய் பொடி', price: 120, mrp: 150, img: JD_IMG('malayambakkam-chennai-physiotherapy-centres-t5g4iq6lnw'), cat: 'Choornam', stock: 50, desc: 'Amla (Indian gooseberry) powder in a sealed pouch.' },
+  { id: 'navalkottai-powder', name: 'Navalkottai Powder', ta: 'நாவல்கொட்டை பொடி', price: 120, mrp: 150, img: JD_IMG('kumaran-nagar-chennai-butter-distributors-apzl3h1tl2'), cat: 'Choornam', stock: 50, desc: 'Jamun (naval) seed powder in a sealed pouch. ' + SIDDHA_NOTE },
+  { id: 'maruthani-powder', name: 'Maruthani Powder', ta: 'மருதாணி பொடி', price: 100, mrp: 120, img: JD_IMG('kumaran-nagar-chennai-butter-distributors-8igh4z88uj'), cat: 'Choornam', stock: 50, desc: 'Henna (maruthani) leaf powder for hair and hands.' }
 ];
 
 const PRASADAM = [
@@ -165,6 +184,8 @@ const LIVE = [
 ];
 
 const MANTRAS = [
+  { name: 'Shadakshara Mantra (Om Saravanabhava)', text: 'ॐ शरवणभव', ta: 'ஓம் சரவணபவ – முருகப் பெருமானின் ஆறெழுத்து மந்திரம்; பயம் நீக்கி வெற்றி அருளும்.', dur: '2:10' },
+  { name: 'Skanda Gayatri', text: 'ॐ तत्पुरुषाय विद्महे महासेनाय धीमहि तन्नः स्कन्दः प्रचोदयात्', ta: 'மகாசேனனான கந்தனை தியானிக்கிறோம்; அவன் நம்மை நல்வழியில் நடத்தட்டும்.', dur: '2:35' },
   { name: 'Kubera Mantra', text: 'ॐ यक्षाय कुबेराय वैश्रवणाय धनधान्याधिपतये धनधान्यसमृद्धिं मे देहि दापय स्वाहा', ta: 'செல்வத்தின் அதிபதியான குபேரனே, எனக்கு செல்வமும் தானியமும் அருள்வாயாக.', dur: '3:12' },
   { name: 'Lakshmi Gayatri', text: 'ॐ महालक्ष्म्यै च विद्महे विष्णुपत्न्यै च धीमहि तन्नो लक्ष्मीः प्रचोदयात्', ta: 'விஷ்ணுவின் துணைவியான மகாலட்சுமியை தியானிக்கிறோம்; அவள் நம்மை வழிநடத்தட்டும்.', dur: '2:40' },
   { name: 'Maha Mrityunjaya Mantra', text: 'ॐ त्र्यम्बकं यजामहे सुगन्धिं पुष्टिवर्धनम् उर्वारुकमिव बन्धनान् मृत्योर्मुक्षीय मामृतात्', ta: 'மூன்று கண்களுடைய சிவனை வணங்குகிறோம்; மரண பயத்திலிருந்து விடுவித்து அமரத்துவம் அருள்வாயாக.', dur: '4:05' },
@@ -172,7 +193,7 @@ const MANTRAS = [
 ];
 
 const ARTICLES = [
-  { id: 'sthala-puranam', title: 'Sthala Puranam of Kuberapattinam', ta: 'குபேரபட்டினம் தல புராணம்', img: IMG.temple, date: '2026-11-10', read: 6, excerpt: 'How a Siddhar\'s blessing during girivalam led to the founding of the Raja Kuberar peedam on the highway near Vellagate.' },
+  { id: 'sthala-puranam', title: 'Sthala Puranam of Sri Navapasana Raja Murugan Temple', ta: 'ஸ்ரீ நவபாஷாண ராஜ முருகன் கோயில் தல புராணம்', img: IMG.temple, date: '2026-11-10', read: 6, excerpt: 'The Navapashana Murugan and the Siddhar tradition behind the peedam at North Poonamallee, Chennai.' },
   { id: 'why-pradosham', title: 'Why Pradosham is the Most Powerful Time for Shiva Worship', ta: 'பிரதோஷத்தின் மகிமை', img: IMG.hero[2], date: '2026-11-02', read: 4, excerpt: 'The story of the churning of the ocean, Nandi, and why devotees gather at twilight on the 13th thithi.' },
   { id: 'annadhanam', title: 'Annam Param Brahmam – The Merit of Annadhanam', ta: 'அன்னம் பரம்பிரம்மம்', img: IMG.donation[1], date: '2026-10-21', read: 5, excerpt: 'Why the scriptures call food the Supreme Brahman and how annadhanam is practised at the peedam every day.' },
   { id: 'kubera-worship', title: 'How to Worship Lord Kubera at Home', ta: 'வீட்டில் குபேர வழிபாடு', img: IMG.hero[0], date: '2026-10-05', read: 7, excerpt: 'Direction, day, lamp and mantra – a simple guide to Kubera pooja on Fridays and Pournami.' }
@@ -198,13 +219,13 @@ const FAQS = [
 
 const LANG = {
   en: { home: 'Home', poojas: 'E-Poojas', services: 'Services', temples: 'Temples', live: 'Live Darshan', shop: 'Divine Collections', donate: 'Donate', membership: 'Membership', panchangam: 'Panchangam', about: 'About Us', contact: 'Contact', track: 'Track Pooja', book: 'Book a Pooja', login: 'Login', account: 'My Account',
-    tagline: 'Authentic Vedic poojas performed in your name & gothram', heroTitle: 'Receive the blessings of Sri Raja Kuberar, wherever you are', heroSub: 'Book poojas, homams and archanas at the peedam. Watch them live and receive video proof and prasadam at your doorstep.',
+    tagline: 'Authentic Vedic poojas performed in your name & gothram', heroTitle: "Receive Lord Murugan's blessings, wherever you are", heroSub: 'Book poojas, homams and archanas at the peedam. Watch them live and receive video proof and prasadam at your doorstep.',
     featured: 'Upcoming Poojas', viewAll: 'View all', bookNow: 'Book Now', specialDays: 'Upcoming Special Days', todayPanchang: "Today's Panchangam", why: 'Why devotees trust us', reviews: 'Devotee Reviews', newsletter: 'Subscribe to our newsletter', subscribe: 'Subscribe' },
   ta: { home: 'முகப்பு', poojas: 'இ-பூஜைகள்', services: 'சேவைகள்', temples: 'கோயில்கள்', live: 'நேரலை தரிசனம்', shop: 'தெய்வீக பொருட்கள்', donate: 'நன்கொடை', membership: 'உறுப்பினர்', panchangam: 'பஞ்சாங்கம்', about: 'எங்களைப் பற்றி', contact: 'தொடர்பு', track: 'பூஜை நிலை', book: 'பூஜை பதிவு', login: 'உள்நுழை', account: 'என் கணக்கு',
-    tagline: 'உங்கள் பெயர் மற்றும் கோத்திரத்தில் வேத பூஜைகள்', heroTitle: 'எங்கிருந்தாலும் ஸ்ரீ ராஜ குபேரரின் அருளைப் பெறுங்கள்', heroSub: 'பீடத்தில் பூஜை, ஹோமம், அர்ச்சனைகளை பதிவு செய்யுங்கள். நேரலையில் காணுங்கள், வீடியோ சான்று மற்றும் பிரசாதம் வீடு தேடி வரும்.',
+    tagline: 'உங்கள் பெயர் மற்றும் கோத்திரத்தில் வேத பூஜைகள்', heroTitle: 'எங்கிருந்தாலும் முருகனின் அருளைப் பெறுங்கள்', heroSub: 'பீடத்தில் பூஜை, ஹோமம், அர்ச்சனைகளை பதிவு செய்யுங்கள். நேரலையில் காணுங்கள், வீடியோ சான்று மற்றும் பிரசாதம் வீடு தேடி வரும்.',
     featured: 'வரவிருக்கும் பூஜைகள்', viewAll: 'அனைத்தும்', bookNow: 'பதிவு செய்', specialDays: 'வரவிருக்கும் விசேஷ நாட்கள்', todayPanchang: 'இன்றைய பஞ்சாங்கம்', why: 'பக்தர்கள் நம்புவதற்கான காரணம்', reviews: 'பக்தர்களின் கருத்துகள்', newsletter: 'செய்தி மடலுக்கு பதிவு செய்யுங்கள்', subscribe: 'பதிவு' }
 };
 
-const DEMO_BOOKING = { id: 'RKDEMO', pooja: 'kubera-lakshmi', name: 'Kubera Lakshmi Pooja', temple: 'Sri Raja Kuberar Temple', date: '2026-11-21', time: '06:00 PM', pkg: 'Family',
+const DEMO_BOOKING = { id: 'RKDEMO', pooja: 'kubera-lakshmi', name: 'Kubera Lakshmi Pooja', temple: 'Sri Navapasana Raja Murugan Temple', date: '2026-11-21', time: '06:00 PM', pkg: 'Family',
   members: [{ name: 'Ramesh Kumar', nak: 'ரோகிணி', rasi: 'ரிஷபம்', goth: 'சிவ கோத்திரம் (Shiva Gothram)' }, { name: 'Lakshmi Ramesh', nak: 'அஸ்தம்', rasi: 'கன்னி', goth: 'சிவ கோத்திரம் (Shiva Gothram)' }],
   contact: 'Ramesh Kumar', mobile: '9876543210', email: '', amount: 1600, currency: 'INR', method: 'upi', prasadam: true, created: '2026-11-18T10:00:00Z', status: 4, courier: { name: 'DTDC', no: 'D74839201IN' } };

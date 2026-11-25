@@ -1,4 +1,6 @@
-# Sri Raja Kuberar – Temple Pooja Booking Platform (HTML + Tailwind + JS)
+# Sri Navapasana Raja Murugan Temple – Pooja Booking Platform (HTML + Tailwind + JS)
+
+Temple: Sri Navapasana Raja Murugan Temple (Siddhar Peedam), 24-25A Murugan Kovil Street, North Poonamallee, Chennai 600123 – [Google Maps](https://maps.app.goo.gl/RwVYhB1NcP7RzCFEA)
 
 Run locally: `node serve.js` → http://localhost:5173  (Admin: http://localhost:5173/admin.html)
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Contact Us – Sri Raja Kuberar</title>
+<title>Contact Us – Sri Navapasana Raja Murugan</title>
 <link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
@@ -18,13 +18,13 @@
       <input class="field" type="email" placeholder="Email"><select class="field"><option>Pooja booking</option><option>Prasadam delivery</option><option>Donation / 80G</option><option>Membership</option><option>Other</option></select>
       <textarea class="field" rows="5" placeholder="Your message" required></textarea><button class="btn btn-gold w-full">Send enquiry</button></form>
   </section>
-  <section class="max-w-7xl mx-auto px-4 pb-12"><iframe class="w-full h-80 rounded-3xl border-0" loading="lazy" title="Map" src="https://maps.google.com/maps?q=Vellagate%20Kanchipuram%20631502&output=embed"></iframe></section>
+  <section class="max-w-7xl mx-auto px-4 pb-12"><iframe class="w-full h-80 rounded-3xl border-0" loading="lazy" title="Map" src="https://maps.google.com/maps?q=13.0368352,80.0909403&z=16&output=embed"></iframe></section>
 </main>
 <div id="site-footer"></div>
 <script>
 $('#hero').innerHTML = pageHero(t('contact'), 'We are here to help – call, WhatsApp or write to us.', [[t('contact')]]);
 const c = (i, k, v, href) => `<a href="${href}" target="_blank" rel="noopener" class="card p-5 flex gap-4 items-center hover:shadow-soft"><span class="w-12 h-12 rounded-2xl bg-gold-100 grid place-items-center text-2xl">${i}</span><div><p class="text-xs text-gray-500">${k}</p><b class="text-temple-900">${v}</b></div></a>`;
-$('#info').innerHTML = c('📞', 'Call us any time', SITE.phone, 'tel:' + SITE.phoneRaw) + c('💬', 'WhatsApp', SITE.phone, 'https://wa.me/' + SITE.phoneRaw) + c('✉', 'Email us', SITE.email, 'mailto:' + SITE.email) + c('📍', 'Visit', SITE.address, 'https://maps.google.com/?q=' + encodeURIComponent(SITE.address))
+$('#info').innerHTML = c('📞', 'Call us any time', SITE.phone, 'tel:' + SITE.phoneRaw) + c('💬', 'WhatsApp', SITE.phone, 'https://wa.me/' + SITE.phoneRaw) + c('✉', 'Email us', SITE.email, 'mailto:' + SITE.email) + c('📍', 'Visit', SITE.address, SITE.mapUrl)
   + `<div class="card p-5 text-sm"><b class="text-temple-900">Office hours</b><p class="text-gray-600 mt-1">Monday – Sunday · 6:00 AM – 9:00 PM IST</p></div>`;
 $('#f').onsubmit = e => { e.preventDefault(); e.target.reset(); toast('🙏 Thank you! We will reply within 24 hours.'); };
 </script>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Receipt – Sri Raja Kuberar</title>
+<title>Receipt – Sri Navapasana Raja Murugan</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
 <script src="assets/data.js"></script><script src="assets/app.js"></script>
@@ -29,7 +29,7 @@ else if (type === 'cert') {
     <p class="mt-8 text-gray-700">This is to certify that the sacred</p><h2 class="font-display text-2xl text-maroon-600 mt-1">${esc(b.name)}</h2>
     <p class="text-gray-700 mt-1">was performed at <b>${esc(b.temple)}</b> on <b>${fmtDate(b.date)}</b> at ${b.time}<br>with sankalpam in the names of</p>
     <div class="mt-4 inline-block text-left">${b.members.map(m => `<p class="font-semibold text-temple-900">🙏 ${esc(m.name)} <span class="font-normal text-sm text-gray-600">· ${m.nak} · ${m.rasi} · ${m.goth}</span></p>`).join('')}</div>
-    <p class="mt-8 text-gray-700 italic">May the divine grace of Sri Raja Kuberar bless you and your family with health, wealth and peace.</p>
+    <p class="mt-8 text-gray-700 italic">May the divine grace of Sri Navapasana Raja Murugan bless you and your family with health, wealth and peace.</p>
     <div class="mt-10 flex justify-between items-end text-sm"><span>Booking ID: <b>${b.id}</b></span><div class="text-center"><div class="font-display text-lg text-temple-800">Swamigal</div><div class="border-t border-gray-400 w-40 mt-1 pt-1 text-xs text-gray-500">Peedam Seal & Signature</div></div></div>
   </div></div>`;
 } else {
