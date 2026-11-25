@@ -5,7 +5,7 @@ To release a new version: update this file, commit, then
 `git tag -a vX.Y.Z -m "vX.Y.Z"` and `git push --follow-tags`.
 
 ## v2.0.1
-- Hero "Next Maha Pooja" card: taller photo, anchored to the top so the deity's face is no longer cut off.
+- Hero "Next Maha Pooja" card: taller photo, positioned so the deity's face and crown sit in the centre of the card.
 
 ## v2.0.0 – Sri Navapasana Raja Murugan Temple
 - Rebranded the whole site to **Sri Navapasana Raja Murugan Temple (Siddhar Peedam)**, North Poonamallee, Chennai 600123 – name, address, phone and map from the Google Maps listing.
