@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Track Pooja Booking – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main>
+  <div id="hero"></div>
+  <section class="max-w-3xl mx-auto px-4 py-10">
+    <form id="f" class="card p-5 flex flex-col sm:flex-row gap-3"><input id="q" class="field" placeholder="Booking ID (e.g. RKDEMO) or mobile number" required><button class="btn btn-gold shrink-0">📍 Track</button></form>
+    <p class="text-xs text-gray-500 mt-2">Try the demo booking ID <button class="text-temple-700 font-bold underline" onclick="$('#q').value='RKDEMO';$('#f').requestSubmit()">RKDEMO</button></p>
+    <div id="out" class="mt-8 space-y-6"></div>
+  </section>
+</main>
+<div id="site-footer"></div>
+<script>
+$('#hero').innerHTML = pageHero(t('track'), 'Follow every stage of your pooja – from sankalpam to prasadam at your door.', [[t('track')]]);
+const STAGES = [['Booked', '🧾'], ['Sankalpam received', '📝'], ['Pooja in progress', '🔥'], ['Video sent', '🎥'], ['Prasadam dispatched', '📦'], ['Delivered', '🏠']];
+function find(q) { q = q.trim().toUpperCase(); const digits = q.replace(/\D/g, ''); const all = [DEMO_BOOKING, ...store.get('bookings', [])];
+  return all.filter(b => b.id.toUpperCase() === q || (digits.length >= 10 && String(b.mobile).replace(/\D/g, '').endsWith(digits.slice(-10)))); }
+function show(list) {
+  if (!list.length) return $('#out').innerHTML = `<div class="card p-10 text-center"><div class="text-5xl">🔍</div><p class="mt-3 text-gray-600">No booking found. Please check the ID or contact us on WhatsApp.</p></div>`;
+  $('#out').innerHTML = list.map(b => {
+    const st = b.status || 0, base = new Date(b.created);
+    return `<div class="card overflow-hidden fade-up"><div class="bg-temple-800 text-white p-5 flex flex-wrap justify-between gap-3"><div><p class="text-xs text-temple-100">Booking ID</p><b class="text-xl tracking-wider">${b.id}</b></div><div class="text-right"><b>${esc(b.name)}</b><p class="text-xs text-temple-100">${esc(b.temple)} · ${fmtDate(b.date)} · ${b.time}</p></div></div>
+      <div class="p-6"><ol class="relative border-l-2 border-temple-100 ml-4 space-y-6">${STAGES.map((s, i) => { const done = i <= st, cur = i === st;
+        return `<li class="pl-8 relative"><span class="absolute -left-[17px] w-8 h-8 rounded-full grid place-items-center text-sm ${done ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-400'} ${cur ? 'ring-4 ring-green-200' : ''}">${done ? '✓' : s[1]}</span>
+        <b class="${done ? 'text-temple-900' : 'text-gray-400'}">${s[0]}</b>${cur ? ' <span class="chip bg-gold-100 text-gold-700 ml-1">Current</span>' : ''}
+        <p class="text-xs text-gray-500">${done ? new Date(base.getTime() + i * 864e5).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }) : 'Pending'}</p>
+        ${i === 3 && done ? `<a href="https://wa.me/${SITE.phoneRaw}" target="_blank" rel="noopener" class="inline-flex mt-2 text-sm text-temple-700 font-semibold">▶ Video sent on WhatsApp – ask us to resend</a>` : ''}
+        ${i === 4 && done && b.courier ? `<p class="mt-2 text-sm bg-gold-50 rounded-lg px-3 py-2 inline-block">🚚 ${esc(b.courier.name)} · <b>${esc(b.courier.no)}</b></p>` : ''}</li>`; }).join('')}</ol>
+        <div class="mt-6 grid sm:grid-cols-2 gap-4 text-sm"><div class="rounded-2xl bg-temple-50 p-4"><b class="text-temple-900">Sankalpam names</b><ul class="mt-2 space-y-1">${b.members.map(m => `<li>🙏 ${esc(m.name)} – ${m.nak}, ${m.rasi}</li>`).join('')}</ul></div>
+        <div class="rounded-2xl bg-gold-50 p-4"><b class="text-temple-900">Notifications</b><p class="mt-2 text-gray-600">WhatsApp, SMS${b.email ? ' & email' : ''} updates are sent at each stage. A reminder with the live link is sent one day before the pooja.</p></div></div>
+        <div class="flex flex-wrap gap-2 mt-5"><a href="receipt.html?id=${b.id}" target="_blank" class="btn btn-outline text-sm !py-2">🧾 Receipt</a><a href="receipt.html?id=${b.id}&type=cert" target="_blank" class="btn btn-outline text-sm !py-2">📜 Certificate</a><a href="live.html" class="btn btn-green text-sm !py-2">📡 Live darshan</a></div></div></div>`;
+  }).join('');
+}
+$('#f').onsubmit = e => { e.preventDefault(); show(find($('#q').value)); };
+if (qs('id')) { $('#q').value = qs('id'); show(find(qs('id'))); }
+</script>
+</body>
+</html>

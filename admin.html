@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Admin Panel – Sri Raja Kuberar</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+<style>body{background:#f4f6f5}</style>
+</head>
+<body class="font-sans">
+<!-- 1. Admin Login -->
+<div id="login" class="min-h-screen grid place-items-center kolam-bg px-4 hidden">
+  <form id="lf" class="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl">
+    <div class="text-center"><script>document.write(imgTag(IMG.logo, 'w-16 h-16 mx-auto rounded-full bg-temple-900'))</script><h1 class="font-display text-2xl text-temple-900 mt-3">Admin Panel</h1><p class="text-sm text-gray-500">Secure login with OTP</p></div>
+    <label class="label mt-6">Staff mobile number</label><input id="am" class="field" inputmode="tel" required placeholder="98765 43210">
+    <div id="aotp" class="hidden mt-3"><label class="label">OTP</label><input id="ao" class="field text-center tracking-[.5em] font-bold" maxlength="4"></div>
+    <button class="btn btn-gold w-full mt-5" id="lb">Send OTP</button>
+    <a href="index.html" class="block text-center text-xs text-gray-500 mt-4">← Back to website</a>
+  </form>
+</div>
+
+<div id="app" class="hidden min-h-screen lg:flex">
+  <aside id="side" class="fixed lg:sticky top-0 left-0 z-40 h-screen w-64 bg-temple-900 text-temple-50 overflow-y-auto -translate-x-full lg:translate-x-0 transition">
+    <div class="p-4 flex items-center gap-2 border-b border-white/10"><script>document.write(imgTag(IMG.logo, 'w-10 h-10 rounded-full'))</script><div><b class="font-display text-gold-200">Raja Kuberar</b><p class="text-[10px] tracking-widest text-temple-200">ADMIN</p></div></div>
+    <nav id="menu" class="p-2 text-sm"></nav>
+  </aside>
+  <div class="flex-1 min-w-0">
+    <header class="sticky top-0 z-30 bg-white border-b px-4 h-14 flex items-center gap-3"><button id="mb" class="lg:hidden w-9 h-9 border rounded-lg">☰</button><h1 id="title" class="font-bold text-temple-900"></h1>
+      <div class="ml-auto flex items-center gap-3 text-sm"><a href="index.html" target="_blank" class="text-temple-700 font-semibold">View site ↗</a><span class="chip bg-temple-50 text-temple-700" id="who"></span><button id="out" class="text-red-600">Logout</button></div></header>
+    <main id="view" class="p-4 md:p-6"></main>
+  </div>
+</div>
+
+<script>
+// ---------- Admin data (localStorage; replace with API) ----------
+const A = {
+  get: (k, d) => store.get('adm_' + k, d), set: (k, v) => store.set('adm_' + k, v),
+  log(msg) { const l = A.get('log', []); l.unshift({ at: new Date().toLocaleString('en-IN'), by: A.get('session', {}).mobile || '-', msg }); A.set('log', l.slice(0, 200)); }
+};
+const bookings = () => [DEMO_BOOKING, ...store.get('bookings', [])];
+const saveBooking = b => { if (b.id === 'RKDEMO') return toast('Demo booking is read-only'); const all = store.get('bookings', []).map(x => x.id === b.id ? b : x); store.set('bookings', all); };
+const STAGES = ['Booked', 'Sankalpam received', 'Pooja in progress', 'Video sent', 'Prasadam dispatched', 'Delivered'];
+const MENU = [
+  ['Overview', [['dashboard', '📊 Dashboard']]],
+  ['Poojas', [['poojas', '🪔 Poojas / Yagnas'], ['bookings', '🧾 Bookings'], ['sankalpam', '📜 Sankalpam List'], ['videos', '🎥 Video Proof Upload'], ['live', '📡 Live Stream Scheduler'], ['dispatch', '📦 Prasadam Dispatch']]],
+  ['Shop & Giving', [['products', '🛍 Products & Inventory'], ['orders', '🚚 Shop Orders'], ['donations', '🙏 Donations & Receipts'], ['darshan', '🎟 Darshan Slots'], ['subs', '🔁 Subscriptions'], ['coupons', '🏷 Coupons & Offers']]],
+  ['Content', [['reviews', '⭐ Reviews Moderation'], ['content', '📚 Content Manager'], ['temples', '🛕 Temples & Priests']]],
+  ['People & Reports', [['users', '👥 Devotees / Users'], ['reports', '📈 Reports & GST Invoices'], ['templates', '💬 Notification Templates'], ['roles', '🔐 Roles & Permissions'], ['settings', '⚙ Settings & Activity Log']]]
+];
+const LABEL = Object.fromEntries(MENU.flatMap(g => g[1]));
+
+// ---------- Generic UI ----------
+const table = (cols, rows, empty = 'No records') => `<div class="card overflow-x-auto"><table class="w-full text-sm"><thead class="bg-temple-50 text-temple-800"><tr>${cols.map(c => `<th class="text-left font-semibold px-4 py-3 whitespace-nowrap">${c}</th>`).join('')}</tr></thead>
+  <tbody>${rows.length ? rows.map(r => `<tr class="border-t hover:bg-gray-50">${r.map(c => `<td class="px-4 py-3 align-top">${c}</td>`).join('')}</tr>`).join('') : `<tr><td colspan="${cols.length}" class="px-4 py-10 text-center text-gray-500">${empty}</td></tr>`}</tbody></table></div>`;
+const kpi = (l, v, i, c = 'bg-white') => `<div class="card p-5 ${c}"><div class="flex justify-between"><p class="text-sm text-gray-500">${l}</p><span class="text-xl">${i}</span></div><b class="text-3xl text-temple-900 block mt-2">${v}</b></div>`;
+const bar = (html = '') => `<div class="flex flex-wrap gap-2 items-center mb-4">${html}</div>`;
+const statusChip = s => `<span class="chip ${s >= 5 ? 'bg-green-100 text-green-700' : s >= 3 ? 'bg-blue-100 text-blue-700' : 'bg-gold-100 text-gold-700'}">${STAGES[s] || s}</span>`;
+function csv(name, cols, rows) { const s = [cols, ...rows].map(r => r.map(c => `"${String(c).replace(/<[^>]+>/g, '').replace(/"/g, '""')}"`).join(',')).join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob(['﻿' + s], { type: 'text/csv' })); a.download = name + '.csv'; a.click(); }
+const sum = (arr, k) => arr.reduce((a, x) => a + (+x[k] || 0), 0);
+
+// ---------- Views ----------
+const V = {
+  dashboard() { const b = bookings(), today = new Date().toISOString().slice(0, 10), o = store.get('orders', []), d = store.get('donations', []);
+    return `<div class="grid grid-cols-2 xl:grid-cols-4 gap-4">${kpi("Today's bookings", b.filter(x => x.created.slice(0, 10) === today).length, '🧾')}${kpi('Revenue (all)', rupee(sum(b, 'amount') + sum(o, 'amount')), '💰')}${kpi('Pending videos', b.filter(x => (x.status || 0) < 3).length, '🎥', 'bg-gold-50')}${kpi('Prasadam to dispatch', b.filter(x => x.prasadam && (x.status || 0) === 3).length, '📦', 'bg-gold-50')}</div>
+    <div class="grid lg:grid-cols-3 gap-6 mt-6"><div class="card p-5 lg:col-span-2"><b class="text-temple-900">Revenue – last 7 days</b><canvas id="ch1" height="110"></canvas></div><div class="card p-5"><b class="text-temple-900">Bookings by pooja</b><canvas id="ch2"></canvas></div></div>
+    <div class="mt-6"><b class="text-temple-900 block mb-3">Recent bookings</b>${table(['ID', 'Pooja', 'Devotee', 'Date', 'Amount', 'Status'], b.slice(0, 6).map(x => [x.id, esc(x.name), esc(x.contact || x.members[0].name), fmtDate(x.date), rupee(x.amount), statusChip(x.status || 0)]))}</div>
+    <div class="grid md:grid-cols-3 gap-4 mt-6">${kpi('Donations', rupee(sum(d, 'amount')), '🙏')}${kpi('Shop orders', o.length, '🛍')}${kpi('Darshan tickets', store.get('darshan', []).length, '🎟')}</div>`; },
+  poojas() { const P = A.get('poojas', null) || POOJAS.map(p => ({ id: p.id, name: p.name, date: p.date, cutoff: p.cutoff, open: true, price: p.pkgs[2].price }));
+    return bar(`<button class="btn btn-gold text-sm !py-2" id="np">+ New pooja / yagna</button>`) + table(['Pooja', 'Date', 'Cutoff', 'From', 'Packages', 'Status', ''], P.map((p, i) => [`<b>${esc(p.name)}</b>`, fmtDate(p.date), fmtDate(p.cutoff), rupee(p.price), 'Family / Pair / Single', p.open ? '<span class="chip bg-green-100 text-green-700">Open</span>' : '<span class="chip bg-gray-200">Closed</span>', `<button class="text-temple-700 font-semibold" data-tog="${i}">${p.open ? 'Close' : 'Reopen'}</button>`])); },
+  bookings() { const b = bookings();
+    return bar(`<input id="bq" class="field max-w-xs !py-2" placeholder="Search ID / name / mobile"><select id="bs" class="field max-w-[12rem] !py-2"><option value="">All status</option>${STAGES.map((s, i) => `<option value="${i}">${s}</option>`).join('')}</select><button class="btn btn-outline text-sm !py-2" id="bx">⬇ Export CSV</button>`)
+      + `<div id="bt">${btable(b)}</div>`; },
+  sankalpam() { const b = bookings(), dates = [...new Set(b.map(x => x.date))].sort();
+    return bar(`<select id="sd" class="field max-w-xs !py-2">${dates.map(d => `<option>${d}</option>`).join('')}</select><button class="btn btn-gold text-sm !py-2" onclick="print()">🖨 Print / PDF for priests</button><button class="btn btn-outline text-sm !py-2" id="sx">⬇ Export CSV</button>`) + `<div id="sl"></div>`; },
+  videos() { const b = bookings().filter(x => (x.status || 0) < 4);
+    return `<div class="card p-6 border-2 border-dashed border-temple-200 text-center"><div class="text-4xl">🎥</div><b class="block mt-2">Bulk upload pooja videos & photos</b><p class="text-sm text-gray-500">Name files with the booking ID (e.g. RK2611251234.mp4) to auto-match.</p><input type="file" id="vf" multiple accept="video/*,image/*" class="mt-4 text-sm"></div>
+      <div class="mt-6">${table(['Booking', 'Pooja', 'WhatsApp', 'Status', ''], b.map(x => [x.id, esc(x.name), esc(x.mobile), statusChip(x.status || 0), `<button class="btn btn-green text-xs !py-1.5" data-send="${x.id}">Upload & send on WhatsApp</button>`]), 'All videos sent 🎉')}</div>`; },
+  live() { const L2 = A.get('live', LIVE.map(l => ({ title: l.title, when: l.when, url: '' })));
+    return `<form id="lf2" class="card p-5 grid md:grid-cols-4 gap-3 items-end"><div class="md:col-span-2"><label class="label">Title</label><input name="title" class="field" required></div><div><label class="label">Date & time</label><input name="when" type="datetime-local" class="field" required></div><div><label class="label">YouTube / stream URL</label><input name="url" class="field" placeholder="https://youtube.com/live/..."></div>
+      <label class="flex items-center gap-2 text-sm md:col-span-3"><input type="checkbox" checked name="notify" class="accent-temple-600"> Notify booked devotees on WhatsApp 1 day before + push notification</label><button class="btn btn-gold">Schedule</button></form>
+      <div class="mt-6">${table(['Stream', 'When', 'Link', ''], L2.map((l, i) => [esc(l.title), esc(l.when), l.url ? `<a href="${esc(l.url)}" target="_blank" class="text-temple-700 underline">Open</a>` : '—', `<button data-dl="${i}" class="text-red-600">Delete</button>`]))}</div>`; },
+  dispatch() { const b = bookings().filter(x => x.prasadam);
+    return bar(`<button class="btn btn-outline text-sm !py-2" onclick="print()">🖨 Packing list & labels</button>`) + table(['Booking', 'Ship to', 'Status', 'Courier', ''], b.map(x => [x.id + '<br><span class="text-xs text-gray-500">' + esc(x.name) + '</span>', x.address ? esc(`${x.contact}, ${x.address.line}, ${x.address.city} ${x.address.pin}`) : '<i class="text-gray-400">Demo</i>', statusChip(x.status || 0), x.courier ? `${esc(x.courier.name)} · <b>${esc(x.courier.no)}</b>` : '—',
+      (x.status || 0) >= 4 ? (x.status < 5 ? `<button class="text-temple-700 font-semibold" data-deliv="${x.id}">Mark delivered</button>` : '✓') : `<button class="btn btn-gold text-xs !py-1.5" data-ship="${x.id}">Create courier order</button>`])); },
+  products() { const P = A.get('products', PRODUCTS.map(p => ({ id: p.id, name: p.name, price: p.price, stock: p.stock, cat: p.cat })));
+    return bar(`<button class="btn btn-gold text-sm !py-2" id="addp">+ Add product</button>`) + table(['Product', 'Category', 'Price', 'Stock', ''], P.map((p, i) => [esc(p.name), p.cat, `<input class="field !py-1 w-24" data-pp="${i}" value="${p.price}">`, `<input class="field !py-1 w-20 ${p.stock < 5 ? 'border-red-400' : ''}" data-ps="${i}" value="${p.stock}">${p.stock < 5 ? ' <span class="text-xs text-red-600">Low</span>' : ''}`, `<button class="text-temple-700 font-semibold" data-psave="${i}">Save</button>`])); },
+  orders() { const o = store.get('orders', []);
+    return table(['Order', 'Customer', 'Items', 'Amount', 'Status', 'Tracking'], o.map((x, i) => [x.id, esc(x.name) + '<br><span class="text-xs text-gray-500">' + esc(x.mobile) + '</span>', x.items.map(it => esc(it.name) + ' × ' + it.qty).join('<br>'), rupee(x.amount),
+      `<select class="field !py-1" data-os="${i}">${['Processing', 'Packed', 'Shipped', 'Delivered', 'Returned'].map(s => `<option ${s === x.status ? 'selected' : ''}>${s}</option>`).join('')}</select>`, `<input class="field !py-1 w-36" data-ot="${i}" value="${esc(x.tracking || '')}" placeholder="AWB no.">`]), 'No shop orders yet'); },
+  donations() { const d = store.get('donations', []);
+    return `<div class="grid md:grid-cols-3 gap-4 mb-6">${kpi('Total donations', rupee(sum(d, 'amount')), '🙏')}${kpi('Donors', d.length, '👥')}${kpi('Monthly donors', d.filter(x => x.monthly).length, '🔁')}</div>`
+      + bar(`<button class="btn btn-outline text-sm !py-2" id="dx">⬇ Export (80G register)</button>`) + table(['Receipt', 'Donor', 'Cause', 'Amount', 'PAN', ''], d.map(x => [x.id, esc(x.contact), esc(x.cause), rupee(x.amount), esc(x.pan || '—'), `<a href="receipt.html?id=${x.id}&type=donation" target="_blank" class="text-temple-700 underline">Receipt</a>`]), 'No donations yet'); },
+  darshan() { const t2 = store.get('darshan', []), cap = A.get('slotcap', 30);
+    return `<div class="card p-5 flex flex-wrap items-end gap-3 mb-6"><div><label class="label">Default capacity per slot</label><input id="cap" type="number" class="field w-32" value="${cap}"></div><button class="btn btn-gold" id="capsave">Save</button><p class="text-sm text-gray-500">Block a date: <input type="date" id="blk" class="field !w-auto !py-1 inline"> <button class="text-temple-700 font-semibold" id="blkb">Block</button></p></div>`
+      + table(['Ticket', 'Devotee', 'Date', 'Slot', 'Persons', 'Amount'], t2.map(x => [x.id, esc(x.name) + '<br><span class="text-xs text-gray-500">' + esc(x.mobile) + '</span>', fmtDate(x.date), x.slot, x.persons, rupee(x.amount)]), 'No darshan tickets yet'); },
+  subs() { const s = store.get('subs', []);
+    return `<div class="grid md:grid-cols-3 gap-4 mb-6">${kpi('Active plans', s.filter(x => x.active).length, '🔁')}${kpi('Monthly recurring', rupee(sum(s.filter(x => x.active), 'price')), '💰')}${kpi('Next run', fmtDate(SPECIAL_DAYS.find(d => d.date >= new Date().toISOString().slice(0, 10))?.date || SPECIAL_DAYS[0].date), '📅')}</div>`
+      + table(['ID', 'Plan', 'Name', 'Nakshatra', 'Amount', 'Status'], s.map(x => [x.id, esc(x.plan), esc(x.name), x.nak, rupee(x.price) + '/mo', x.active ? '<span class="chip bg-green-100 text-green-700">Active</span>' : '<span class="chip bg-gray-200">Paused</span>']), 'No subscriptions yet'); },
+  coupons() { const c = A.get('coupons', [{ code: 'PRADOSHAM10', off: 10, uses: 142, until: '2026-12-31', on: true }, { code: 'FIRST15', off: 15, uses: 388, until: '2027-03-31', on: true }]);
+    return `<form id="cf" class="card p-5 grid md:grid-cols-4 gap-3 items-end mb-6"><div><label class="label">Code</label><input name="code" class="field uppercase" required></div><div><label class="label">% off</label><input name="off" type="number" min="1" max="90" class="field" required></div><div><label class="label">Valid until</label><input name="until" type="date" class="field" required></div><button class="btn btn-gold">Create coupon</button></form>`
+      + table(['Code', 'Discount', 'Used', 'Valid until', 'Status'], c.map((x, i) => [`<b class="tracking-wider">${esc(x.code)}</b>`, x.off + '%', x.uses, fmtDate(x.until), `<button data-ct="${i}" class="chip ${x.on ? 'bg-green-100 text-green-700' : 'bg-gray-200'}">${x.on ? 'Active' : 'Disabled'}</button>`])); },
+  reviews() { const r = A.get('reviews', REVIEWS.map(x => ({ ...x, state: 'approved', reply: '' })));
+    return `<div class="space-y-4">${r.map((x, i) => `<div class="card p-5"><div class="flex flex-wrap justify-between gap-2"><div><b>${esc(x.name)}</b> <span class="text-gold-500">${'★'.repeat(x.rating)}</span><p class="text-xs text-gray-500">${esc(x.pooja)} · ✔ verified booking</p></div><span class="chip ${x.state === 'approved' ? 'bg-green-100 text-green-700' : x.state === 'hidden' ? 'bg-gray-200' : 'bg-gold-100 text-gold-700'}">${x.state}</span></div>
+      <p class="text-sm mt-2">${esc(x.text)}</p>${x.reply ? `<p class="text-sm mt-2 bg-temple-50 rounded-lg p-2">↳ <b>Temple:</b> ${esc(x.reply)}</p>` : ''}
+      <div class="flex gap-2 mt-3"><button data-rv="${i}" data-st="approved" class="btn btn-outline text-xs !py-1">Approve</button><button data-rv="${i}" data-st="hidden" class="btn btn-outline text-xs !py-1">Hide</button><button data-rr="${i}" class="btn btn-outline text-xs !py-1">Reply</button></div></div>`).join('')}</div>`; },
+  content() { return `<div class="grid md:grid-cols-2 gap-6">
+      <div class="card p-5"><b class="text-temple-900">📅 Special days calendar</b><form id="sdf" class="flex gap-2 mt-3"><input type="date" name="date" class="field !py-2" required><select name="type" class="field !py-2">${['Pradosham', 'Sashti', 'Ekadasi', 'Kiruthigai', 'Pournami', 'Amavasai'].map(x => `<option>${x}</option>`).join('')}</select><button class="btn btn-gold !py-2 text-sm">Add</button></form>
+        <ul class="text-sm mt-3 space-y-1 max-h-48 overflow-auto">${SPECIAL_DAYS.concat(A.get('days', [])).map(d => `<li>${fmtDate(d.date)} – ${d.type}</li>`).join('')}</ul></div>
+      <div class="card p-5"><b class="text-temple-900">🕉 Panchangam override</b><p class="text-xs text-gray-500">Auto-calculated daily; override for festivals.</p><div class="grid grid-cols-2 gap-2 mt-3"><input type="date" class="field !py-2"><input class="field !py-2" placeholder="Thithi"><input class="field !py-2" placeholder="Nakshatra"><input class="field !py-2" placeholder="Nalla neram"></div><button class="btn btn-gold text-sm !py-2 mt-3" onclick="toast('Saved');A.log('Panchangam override saved')">Save</button></div>
+      <div class="card p-5"><b class="text-temple-900">📝 Articles</b><ul class="text-sm mt-3 space-y-2">${ARTICLES.map(a => `<li class="flex justify-between"><span>${esc(a.title)}</span><a href="article.html?id=${a.id}" target="_blank" class="text-temple-700">View</a></li>`).join('')}</ul><button class="btn btn-outline text-sm !py-2 mt-3" onclick="toast('Connect a CMS / editor here')">+ New article</button></div>
+      <div class="card p-5"><b class="text-temple-900">🎵 Mantras & audio</b><ul class="text-sm mt-3 space-y-2">${MANTRAS.map(m => `<li class="flex justify-between items-center gap-2"><span>${esc(m.name)}</span><input type="file" accept="audio/*" class="text-xs w-40"></li>`).join('')}</ul></div></div>`; },
+  temples() { return `<div class="grid md:grid-cols-3 gap-5">${TEMPLES.map(tp => `<div class="card overflow-hidden">${imgTag(tp.img, 'w-full aspect-video object-cover')}<div class="p-4"><b>${esc(tp.name)}</b><p class="text-xs text-gray-500">${esc(tp.city)}</p><label class="label mt-3">Authorization letter (PDF/JPG)</label><input type="file" accept=".pdf,image/*" class="text-xs"><label class="label mt-3">360° tour images</label><input type="file" multiple accept="image/*" class="text-xs"></div></div>`).join('')}</div>
+      <h2 class="font-bold text-temple-900 mt-8 mb-3">Priests</h2>${table(['Photo', 'Name', 'Experience', 'Speciality'], PRIESTS.map(p => [imgTag(p.img, 'w-12 h-12 rounded-lg object-cover'), esc(p.name), p.exp + ' yrs', esc(p.spec)]))}`; },
+  users() { const b = bookings(), map = {}; b.forEach(x => { const k = x.mobile; map[k] = map[k] || { name: x.contact || x.members[0].name, mobile: k, n: 0, spent: 0, last: x.date }; map[k].n++; map[k].spent += +x.amount; });
+    return table(['Devotee', 'Mobile', 'Bookings', 'Total spent', 'Last pooja'], Object.values(map).map(u => [esc(u.name), esc(u.mobile), u.n, rupee(u.spent), fmtDate(u.last)])); },
+  reports() { const b = bookings(), by = {}; b.forEach(x => by[x.name] = (by[x.name] || 0) + +x.amount);
+    return bar(`<select class="field max-w-[10rem] !py-2"><option>This month</option><option>Last month</option><option>This year</option></select><button class="btn btn-outline text-sm !py-2" id="rx">⬇ GST report CSV</button>`)
+      + `<div class="grid lg:grid-cols-2 gap-6"><div class="card p-5"><b>Revenue by pooja</b><canvas id="ch3"></canvas></div><div class="card p-5"><b>Revenue by month</b><canvas id="ch4"></canvas></div></div>
+      <div class="mt-6">${table(['Invoice', 'Date', 'Taxable', 'GST 18%*', 'Total'], b.map(x => [x.id, new Date(x.created).toLocaleDateString('en-IN'), rupee(Math.round(x.amount / 1.18)), rupee(x.amount - Math.round(x.amount / 1.18)), rupee(x.amount)]))}<p class="text-xs text-gray-500 mt-2">*Religious services may be GST-exempt; set the applicable rate in Settings.</p></div>`; },
+  templates() { const T = A.get('tpl', { booked: '🙏 Vanakkam {name}, your {pooja} on {date} is booked. ID: {id}. Track: {link}', video: '🎥 Your {pooja} was performed today. Watch: {video}', dispatched: '📦 Prasadam dispatched via {courier}. Tracking: {awb}', reminder: '🔔 Tomorrow: {pooja} at {time}. Watch live: {live}' });
+    return `<div class="grid md:grid-cols-2 gap-5">${Object.entries(T).map(([k, v]) => `<div class="card p-5"><div class="flex justify-between"><b class="capitalize">${k}</b><div class="flex gap-1 text-xs"><span class="chip bg-green-100 text-green-700">WhatsApp</span><span class="chip bg-blue-100 text-blue-700">SMS</span><span class="chip bg-gray-100">Email</span></div></div><textarea data-tpl="${k}" class="field mt-3" rows="3">${esc(v)}</textarea></div>`).join('')}</div>
+      <p class="text-xs text-gray-500 mt-3">Variables: {name} {pooja} {date} {time} {id} {link} {video} {courier} {awb} {live}</p><button class="btn btn-gold mt-4" id="tsave">Save templates</button>`; },
+  roles() { const R = ['Super Admin', 'Manager', 'Priest', 'Dispatch', 'Accounts'], perms = ['Bookings', 'Videos', 'Dispatch', 'Shop', 'Donations', 'Reports', 'Settings'];
+    const def = { 'Super Admin': perms, Manager: perms.slice(0, 6), Priest: ['Bookings', 'Videos'], Dispatch: ['Dispatch', 'Shop'], Accounts: ['Donations', 'Reports'] };
+    return table(['Role', ...perms], R.map(r => [`<b>${r}</b>`, ...perms.map(p => `<input type="checkbox" class="accent-temple-600 w-4 h-4" ${def[r].includes(p) ? 'checked' : ''} ${r === 'Super Admin' ? 'disabled' : ''}>`)]))
+      + `<h2 class="font-bold mt-8 mb-3">Staff</h2>` + table(['Name', 'Mobile', 'Role'], [['Balaji P.', '98400 •••••', 'Super Admin'], ['Sujatha', '98840 •••••', 'Manager'], ['Venkatesa Gurukkal', '94440 •••••', 'Priest'], ['Dispatch desk', '90030 •••••', 'Dispatch']]); },
+  settings() { const s = A.get('settings', { gateway: 'Razorpay', intl: 'Stripe', delivery: 99, freeAbove: 999, langs: 'English, Tamil', gst: 0 });
+    return `<form id="sf" class="card p-6 grid md:grid-cols-3 gap-4"><div><label class="label">Payment gateway (INR)</label><select name="gateway" class="field"><option ${s.gateway === 'Razorpay' ? 'selected' : ''}>Razorpay</option><option>PayU</option><option>Cashfree</option></select></div>
+      <div><label class="label">International gateway</label><select name="intl" class="field"><option>Stripe</option><option>Razorpay International</option></select></div><div><label class="label">GST rate %</label><input name="gst" type="number" class="field" value="${s.gst}"></div>
+      <div><label class="label">Prasadam delivery charge (₹)</label><input name="delivery" type="number" class="field" value="${s.delivery}"></div><div><label class="label">Free shipping above (₹)</label><input name="freeAbove" type="number" class="field" value="${s.freeAbove}"></div>
+      <div><label class="label">Languages</label><input name="langs" class="field" value="${esc(s.langs)}"><p class="text-[11px] text-gray-500">Next: Telugu, Kannada, Hindi</p></div><button class="btn btn-gold md:col-span-3">Save settings</button></form>
+      <h2 class="font-bold mt-8 mb-3">Activity log (audit trail)</h2>${table(['Time', 'User', 'Action'], A.get('log', []).map(l => [l.at, esc(l.by), esc(l.msg)]), 'No activity yet')}`; }
+};
+function btable(b) { return table(['ID', 'Pooja / date', 'Devotees', 'Contact', 'Amount', 'Status', 'Update'], b.map(x => [`<b>${x.id}</b>`, esc(x.name) + '<br><span class="text-xs text-gray-500">' + fmtDate(x.date) + ' · ' + x.pkg + '</span>', x.members.map(m => esc(m.name)).join('<br>'), esc(x.mobile), (x.currency && x.currency !== 'INR' ? x.currency + ' ' : '₹') + x.amount, statusChip(x.status || 0),
+  `<select class="field !py-1 text-xs" data-bst="${x.id}">${STAGES.map((s, i) => `<option value="${i}" ${i === (x.status || 0) ? 'selected' : ''}>${s}</option>`).join('')}</select>`])); }
+
+// ---------- Bind actions per view ----------
+const charts = []; let curView;
+function bind(v) {
+  charts.splice(0).forEach(c => c.destroy());
+  const C = (id, cfg) => { if (window.Chart && $(id)) charts.push(new Chart($(id), cfg)); };
+  const green = '#206843', gold = '#f5b324';
+  if (v === 'dashboard') { const days = [...Array(7)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() - 6 + i); return d; });
+    C('#ch1', { type: 'bar', data: { labels: days.map(d => d.toLocaleDateString('en-IN', { weekday: 'short' })), datasets: [{ label: '₹', data: days.map((d, i) => 8000 + ((i * 3779) % 9000) + sum(bookings().filter(x => x.created.slice(0, 10) === d.toISOString().slice(0, 10)), 'amount')), backgroundColor: green, borderRadius: 6 }] }, options: { plugins: { legend: { display: false } } } });
+    const by = {}; bookings().forEach(x => by[x.name] = (by[x.name] || 0) + 1); C('#ch2', { type: 'doughnut', data: { labels: Object.keys(by), datasets: [{ data: Object.values(by), backgroundColor: [green, gold, '#9b2c2c', '#74ba91', '#e09a0e'] }] }, options: { plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } } }); }
+  if (v === 'reports') { const by = {}; bookings().forEach(x => by[x.name] = (by[x.name] || 0) + +x.amount);
+    C('#ch3', { type: 'bar', data: { labels: Object.keys(by), datasets: [{ data: Object.values(by), backgroundColor: green, borderRadius: 6 }] }, options: { indexAxis: 'y', plugins: { legend: { display: false } } } });
+    C('#ch4', { type: 'line', data: { labels: ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'], datasets: [{ data: [182000, 205000, 241000, 228000, 296000, 312000 + sum(bookings(), 'amount')], borderColor: gold, backgroundColor: 'rgba(245,179,36,.15)', fill: true, tension: .3 }] }, options: { plugins: { legend: { display: false } } } });
+    $('#rx').onclick = () => csv('gst-report', ['Invoice', 'Date', 'Amount'], bookings().map(x => [x.id, x.created.slice(0, 10), x.amount])); }
+  if (v === 'bookings') { const f = () => { const q = $('#bq').value.toLowerCase(), s = $('#bs').value; $('#bt').innerHTML = btable(bookings().filter(x => (s === '' || (x.status || 0) == s) && JSON.stringify([x.id, x.name, x.mobile, x.members]).toLowerCase().includes(q))); bindStatus(); };
+    $('#bq').oninput = $('#bs').onchange = f; $('#bx').onclick = () => csv('bookings', ['ID', 'Pooja', 'Date', 'Mobile', 'Amount', 'Status'], bookings().map(x => [x.id, x.name, x.date, x.mobile, x.amount, STAGES[x.status || 0]])); bindStatus(); }
+  if (v === 'sankalpam') { const draw = () => { const list = bookings().filter(x => x.date === $('#sd').value); let n = 0;
+      $('#sl').innerHTML = `<div class="card p-6"><h2 class="font-display text-2xl text-center text-temple-900">Sankalpam List · ${fmtDate($('#sd').value)}</h2>` + list.map(x => `<h3 class="font-bold mt-5 border-b pb-1">${esc(x.name)} – ${x.id}</h3><table class="w-full text-sm mt-2">${x.members.map(m => `<tr class="border-b"><td class="py-1.5 w-8">${++n}</td><td class="font-semibold">${esc(m.name)}</td><td>${m.nak}</td><td>${m.rasi}</td><td>${esc(m.goth)}</td></tr>`).join('')}</table>`).join('') + '</div>'; };
+    $('#sd').onchange = draw; draw(); $('#sx').onclick = () => csv('sankalpam-' + $('#sd').value, ['Booking', 'Name', 'Nakshatra', 'Rasi', 'Gothram'], bookings().filter(x => x.date === $('#sd').value).flatMap(x => x.members.map(m => [x.id, m.name, m.nak, m.rasi, m.goth]))); }
+  if (v === 'videos') { $('#vf').onchange = e => { const ids = [...e.target.files].map(f => f.name.split('.')[0].toUpperCase()); let n = 0; const all = store.get('bookings', []).map(b => ids.includes(b.id) && b.status < 3 ? (n++, { ...b, status: 3 }) : b); store.set('bookings', all); A.log(`Bulk video upload: ${e.target.files.length} files, ${n} matched`); toast(`${e.target.files.length} files uploaded · ${n} matched & sent on WhatsApp`); go('videos'); };
+    $$('[data-send]').forEach(b => b.onclick = () => { const x = bookings().find(y => y.id === b.dataset.send); x.status = 3; saveBooking(x); A.log('Video sent for ' + x.id); toast('🎥 Video sent on WhatsApp to ' + esc(x.mobile)); go('videos'); }); }
+  if (v === 'live') { $('#lf2').onsubmit = e => { e.preventDefault(); const f = Object.fromEntries(new FormData(e.target)); const L2 = A.get('live', LIVE.map(l => ({ title: l.title, when: l.when, url: '' }))); L2.push({ title: f.title, when: new Date(f.when).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' }), url: f.url }); A.set('live', L2); A.log('Live stream scheduled: ' + f.title); toast('📡 Scheduled' + (f.notify ? ' – devotees will be notified' : '')); go('live'); };
+    $$('[data-dl]').forEach(b => b.onclick = () => { const L2 = A.get('live', []); L2.splice(b.dataset.dl, 1); A.set('live', L2); go('live'); }); }
+  if (v === 'dispatch') { $$('[data-ship]').forEach(b => b.onclick = () => { const x = bookings().find(y => y.id === b.dataset.ship); x.status = 4; x.courier = { name: 'DTDC', no: 'D' + Math.floor(1e9 * Math.random()) + 'IN' }; saveBooking(x); A.log('Prasadam dispatched ' + x.id); toast('📦 Courier booked: ' + x.courier.no + ' – sent on WhatsApp & SMS'); go('dispatch'); });
+    $$('[data-deliv]').forEach(b => b.onclick = () => { const x = bookings().find(y => y.id === b.dataset.deliv); x.status = 5; saveBooking(x); A.log('Delivered ' + x.id); go('dispatch'); }); }
+  if (v === 'products') { const get = () => A.get('products', PRODUCTS.map(p => ({ id: p.id, name: p.name, price: p.price, stock: p.stock, cat: p.cat })));
+    $$('[data-psave]').forEach(b => b.onclick = () => { const P = get(), i = b.dataset.psave; P[i].price = +$(`[data-pp="${i}"]`).value; P[i].stock = +$(`[data-ps="${i}"]`).value; A.set('products', P); A.log('Product updated: ' + P[i].name); toast('Saved'); go('products'); });
+    $('#addp').onclick = () => { const m = modal(`<form class="p-7 space-y-3"><h3 class="font-display text-2xl">Add product</h3><input name="name" class="field" placeholder="Name" required><input name="cat" class="field" placeholder="Category" required><div class="grid grid-cols-2 gap-3"><input name="price" type="number" class="field" placeholder="Price" required><input name="stock" type="number" class="field" placeholder="Stock" required></div><input name="img" class="field" placeholder="Image URL"><button class="btn btn-gold w-full">Add</button></form>`);
+      $('form', m).onsubmit = e => { e.preventDefault(); const f = Object.fromEntries(new FormData(e.target)); A.set('products', [...get(), { ...f, id: 'p' + Date.now(), price: +f.price, stock: +f.stock }]); A.log('Product added: ' + f.name); m.remove(); go('products'); }; }; }
+  if (v === 'orders') { const o = store.get('orders', []);
+    $$('[data-os]').forEach(s => s.onchange = () => { o[s.dataset.os].status = s.value; store.set('orders', o); A.log(`Order ${o[s.dataset.os].id} → ${s.value}`); toast('Status updated – customer notified'); });
+    $$('[data-ot]').forEach(s => s.onchange = () => { o[s.dataset.ot].tracking = s.value; store.set('orders', o); toast('Tracking saved'); }); }
+  if (v === 'donations') $('#dx').onclick = () => csv('donations', ['Receipt', 'Donor', 'Mobile', 'PAN', 'Cause', 'Amount', 'Date'], store.get('donations', []).map(x => [x.id, x.contact, x.mobile, x.pan, x.cause, x.amount, x.created.slice(0, 10)]));
+  if (v === 'darshan') { $('#capsave').onclick = () => { A.set('slotcap', +$('#cap').value); A.log('Slot capacity → ' + $('#cap').value); toast('Saved'); }; $('#blkb').onclick = () => { if ($('#blk').value) { A.log('Blocked darshan date ' + $('#blk').value); toast('Date blocked'); } }; }
+  if (v === 'coupons') { const get = () => A.get('coupons', [{ code: 'PRADOSHAM10', off: 10, uses: 142, until: '2026-12-31', on: true }, { code: 'FIRST15', off: 15, uses: 388, until: '2027-03-31', on: true }]);
+    $('#cf').onsubmit = e => { e.preventDefault(); const f = Object.fromEntries(new FormData(e.target)); A.set('coupons', [...get(), { code: f.code.toUpperCase(), off: +f.off, until: f.until, uses: 0, on: true }]); A.log('Coupon created ' + f.code); go('coupons'); };
+    $$('[data-ct]').forEach(b => b.onclick = () => { const c = get(); c[b.dataset.ct].on = !c[b.dataset.ct].on; A.set('coupons', c); go('coupons'); }); }
+  if (v === 'reviews') { const get = () => A.get('reviews', REVIEWS.map(x => ({ ...x, state: 'approved', reply: '' })));
+    $$('[data-rv]').forEach(b => b.onclick = () => { const r = get(); r[b.dataset.rv].state = b.dataset.st; A.set('reviews', r); A.log(`Review by ${r[b.dataset.rv].name} → ${b.dataset.st}`); go('reviews'); });
+    $$('[data-rr]').forEach(b => b.onclick = () => { const r = get(), txt = prompt('Reply from temple:'); if (txt) { r[b.dataset.rr].reply = txt; A.set('reviews', r); go('reviews'); } }); }
+  if (v === 'content') $('#sdf').onsubmit = e => { e.preventDefault(); const f = Object.fromEntries(new FormData(e.target)); A.set('days', [...A.get('days', []), f]); A.log('Special day added ' + f.date); go('content'); };
+  if (v === 'templates') $('#tsave').onclick = () => { const T = {}; $$('[data-tpl]').forEach(t2 => T[t2.dataset.tpl] = t2.value); A.set('tpl', T); A.log('Notification templates updated'); toast('Templates saved'); };
+  if (v === 'settings') $('#sf').onsubmit = e => { e.preventDefault(); A.set('settings', Object.fromEntries(new FormData(e.target))); A.log('Settings updated'); toast('Settings saved'); go('settings'); };
+  if (v === 'poojas') { const get = () => A.get('poojas', null) || POOJAS.map(p => ({ id: p.id, name: p.name, date: p.date, cutoff: p.cutoff, open: true, price: p.pkgs[2].price }));
+    $$('[data-tog]').forEach(b => b.onclick = () => { const P = get(); P[b.dataset.tog].open = !P[b.dataset.tog].open; A.set('poojas', P); A.log(`Pooja ${P[b.dataset.tog].name} ${P[b.dataset.tog].open ? 'reopened' : 'closed'}`); go('poojas'); });
+    $('#np').onclick = () => { const m = modal(`<form class="p-7 space-y-3"><h3 class="font-display text-2xl">New pooja / yagna</h3><input name="name" class="field" placeholder="Pooja name" required><input name="tagline" class="field" placeholder="Short description"><div class="grid grid-cols-2 gap-3"><div><label class="label">Pooja date</label><input name="date" type="date" class="field" required></div><div><label class="label">Booking cutoff</label><input name="cutoff" type="date" class="field" required></div></div>
+      <div class="grid grid-cols-3 gap-2"><input name="f" type="number" class="field" placeholder="Family ₹" required><input name="p" type="number" class="field" placeholder="Pair ₹" required><input name="price" type="number" class="field" placeholder="Single ₹" required></div><input name="img" class="field" placeholder="Image URL"><input name="video" class="field" placeholder="Sample video embed URL"><button class="btn btn-gold w-full">Create</button></form>`);
+      $('form', m).onsubmit = e => { e.preventDefault(); const f = Object.fromEntries(new FormData(e.target)); A.set('poojas', [...get(), { ...f, id: 'p' + Date.now(), open: true, price: +f.price }]); A.log('Pooja created ' + f.name); m.remove(); go('poojas'); }; }; }
+}
+function bindStatus() { $$('[data-bst]').forEach(s => s.onchange = () => { const x = bookings().find(y => y.id === s.dataset.bst); x.status = +s.value; saveBooking(x); A.log(`${x.id} → ${STAGES[x.status]}`); toast(`Status updated · WhatsApp/SMS sent to devotee`); }); }
+
+function go(v) {
+  if (!V[v]) v = 'dashboard'; curView = v; if (location.hash.slice(1) !== v) location.hash = v;
+  $('#menu').innerHTML = MENU.map(([g, items]) => `<p class="px-3 pt-4 pb-1 text-[10px] uppercase tracking-widest text-temple-300">${g}</p>` + items.map(([id, l]) => `<a href="#${id}" class="block px-3 py-2 rounded-lg ${id === v ? 'bg-gold-400 text-temple-900 font-bold' : 'hover:bg-white/10'}">${l}</a>`).join('')).join('');
+  $('#title').textContent = LABEL[v].replace(/^\S+\s/, ''); $('#view').innerHTML = `<div class="fade-up">${V[v]()}</div>`; bind(v);
+  $('#side').classList.add('-translate-x-full');
+}
+// ---------- Auth ----------
+function boot() { const s = A.get('session', null);
+  $('#login').classList.toggle('hidden', !!s); $('#app').classList.toggle('hidden', !s);
+  if (s) { $('#who').textContent = '👤 ' + s.mobile; go(location.hash.slice(1)); } }
+let otpSent = false;
+$('#lf').onsubmit = e => { e.preventDefault();
+  if (!otpSent) { if (sendOtp($('#am').value)) { otpSent = true; $('#aotp').classList.remove('hidden'); $('#lb').textContent = 'Verify & login'; $('#ao').focus(); } return; }
+  if (!verifyOtp($('#ao').value)) return toast('Incorrect OTP');
+  A.set('session', { mobile: $('#am').value, at: Date.now() }); A.log('Admin login'); boot(); };
+$('#out').onclick = () => { A.log('Admin logout'); A.set('session', null); location.hash = ''; boot(); };
+$('#mb').onclick = () => $('#side').classList.toggle('-translate-x-full');
+window.onhashchange = () => { if (A.get('session', null) && location.hash.slice(1) !== curView) go(location.hash.slice(1)); };
+boot();
+</script>
+</body>
+</html>

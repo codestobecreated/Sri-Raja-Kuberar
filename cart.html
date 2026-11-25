@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cart & Checkout – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main><div id="hero"></div><section class="max-w-6xl mx-auto px-4 py-10" id="page"></section></main>
+<div id="site-footer"></div>
+<script>
+$('#hero').innerHTML = pageHero('Cart & Checkout', '', [['Cart']]);
+const ALL = [...PRODUCTS, ...PRASADAM.map(x => ({ ...x, img: IMG.service[4], prasadam: true }))];
+const savedAddr = store.get('addresses', []);
+function draw() {
+  const items = cart.all().map(i => ({ ...ALL.find(p => p.id === i.id), qty: i.qty })).filter(i => i.name);
+  if (!items.length) return $('#page').innerHTML = `<div class="card p-12 text-center"><div class="text-6xl">🛒</div><h2 class="font-display text-2xl text-temple-900 mt-3">Your cart is empty</h2><div class="flex justify-center gap-3 mt-5"><a href="shop.html" class="btn btn-gold">Divine Collections</a><a href="prasadam.html" class="btn btn-outline">Order prasadam</a></div></div>`;
+  const sub = items.reduce((a, i) => a + i.price * i.qty, 0), ship = sub >= 999 ? 0 : 79;
+  $('#page').innerHTML = `<div class="grid lg:grid-cols-3 gap-8"><div class="lg:col-span-2 space-y-3">${items.map(i => `<div class="card p-4 flex gap-4 items-center">${imgTag(i.img, 'w-20 h-20 rounded-xl object-cover bg-temple-50')}
+    <div class="flex-1"><b class="text-temple-900">${esc(i.name)}</b><p class="text-sm text-gray-500">${rupee(i.price)} each</p></div>
+    <div class="flex items-center border rounded-xl"><button class="w-9 h-9" data-q="${i.id}" data-d="-1">−</button><b class="w-8 text-center">${i.qty}</b><button class="w-9 h-9" data-q="${i.id}" data-d="1">+</button></div>
+    <b class="w-20 text-right text-temple-700">${rupee(i.price * i.qty)}</b><button data-q="${i.id}" data-d="-999" class="text-gray-400 hover:text-red-600" aria-label="Remove">✕</button></div>`).join('')}
+    <div class="card p-6"><h3 class="font-bold text-temple-900 mb-3">📦 Delivery address</h3>
+      ${savedAddr.length ? `<select id="saved" class="field mb-3"><option value="">— Use a saved address —</option>${savedAddr.map((a, k) => `<option value="${k}">${esc(a.label)}: ${esc(a.line)}, ${esc(a.city)}</option>`).join('')}</select>` : ''}
+      <div class="grid sm:grid-cols-2 gap-3"><input id="n" class="field" placeholder="Full name" value="${esc(user()?.name || '')}"><input id="m" class="field" placeholder="Mobile" value="${esc(user()?.mobile || '')}"><textarea id="l" class="field sm:col-span-2" rows="2" placeholder="Address"></textarea><input id="c" class="field" placeholder="City"><input id="pin" class="field" placeholder="PIN code"></div></div></div>
+  <aside class="card p-6 h-fit lg:sticky lg:top-24"><h3 class="font-display text-2xl text-temple-900">Order summary</h3>
+    <div class="mt-4 space-y-2 text-sm"><div class="flex justify-between"><span>Subtotal</span><b>${rupee(sub)}</b></div><div class="flex justify-between"><span>Shipping</span><b>${ship ? rupee(ship) : 'FREE'}</b></div>${ship ? `<p class="text-xs text-gray-500">Free shipping above ₹999</p>` : ''}
+    <div class="flex justify-between border-t pt-3 text-base"><b>Total</b><b class="text-xl text-temple-700">${rupee(sub + ship)}</b></div></div>
+    <label class="label mt-4">Payment</label><select class="field" id="pm"><option value="upi">UPI</option><option value="card">Card</option><option value="nb">Netbanking</option><option value="intl">International (USD/SGD/MYR/AED)</option></select>
+    <button id="pay" class="btn btn-gold w-full mt-5">🔒 Pay ${rupee(sub + ship)}</button></aside></div>`;
+  $$('[data-q]').forEach(b => b.onclick = () => { const it = cart.all().find(i => i.id === b.dataset.q); cart.set(b.dataset.q, Math.max(0, it.qty + +b.dataset.d)); draw(); });
+  if ($('#saved')) $('#saved').onchange = e => { const a = savedAddr[e.target.value]; if (a) { $('#l').value = a.line; $('#c').value = a.city; $('#pin').value = a.pin; } };
+  $('#pay').onclick = () => {
+    if (!$('#n').value || !$('#m').value || !$('#l').value || !$('#pin').value) return toast('Please complete the delivery address');
+    const o = { id: genId('OD'), items: items.map(i => ({ id: i.id, name: i.name, qty: i.qty, price: i.price })), amount: sub + ship, name: $('#n').value, contact: $('#n').value, mobile: $('#m').value, address: { line: $('#l').value, city: $('#c').value, pin: $('#pin').value }, method: $('#pm').value, status: 'Processing', created: new Date().toISOString() };
+    const all = store.get('orders', []); all.unshift(o); store.set('orders', all); cart.clear();
+    $('#page').innerHTML = `<div class="card p-12 text-center max-w-xl mx-auto fade-up"><div class="text-6xl">✅</div><h2 class="font-display text-3xl text-temple-900 mt-3">Order placed!</h2><p class="text-gray-600 mt-2">Order ID <b>${o.id}</b>. Tracking number will be sent on WhatsApp once dispatched.</p>
+      <div class="flex justify-center gap-3 mt-6"><a href="receipt.html?id=${o.id}&type=order" target="_blank" class="btn btn-outline">🧾 Invoice</a><a href="account.html#orders" class="btn btn-green">My orders</a></div></div>`;
+  };
+}
+draw();
+</script>
+</body>
+</html>

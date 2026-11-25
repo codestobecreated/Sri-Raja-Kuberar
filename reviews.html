@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Devotee Reviews – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main><div id="hero"></div><section class="max-w-7xl mx-auto px-4 py-12">
+  <div class="card p-6 grid md:grid-cols-3 gap-6 items-center mb-8"><div class="text-center"><b class="text-6xl font-display text-temple-700">4.9</b><div class="text-gold-500 text-2xl">★★★★★</div><p class="text-sm text-gray-600">from 1,800+ verified bookings</p></div>
+    <div class="md:col-span-2 space-y-1 text-sm" id="bars"></div></div>
+  <div id="list" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  <p class="text-center text-sm text-gray-600 mt-8">✔ Only devotees who have booked a pooja can write a review. <a href="poojas.html" class="text-temple-700 font-semibold">Book a pooja</a></p></section></main>
+<div id="site-footer"></div>
+<script>
+$('#hero').innerHTML = pageHero(t('reviews'), 'Real experiences from devotees who booked with us.', [['Reviews']]);
+$('#bars').innerHTML = [[5, 88], [4, 9], [3, 2], [2, 1], [1, 0]].map(([s, p]) => `<div class="flex items-center gap-3"><span class="w-8">${s} ★</span><div class="flex-1 h-2 bg-gray-100 rounded-full"><div class="h-2 bg-gold-400 rounded-full" style="width:${p}%"></div></div><span class="w-10 text-right text-gray-500">${p}%</span></div>`).join('');
+$('#list').innerHTML = REVIEWS.map(reviewCard).join(''); // sample reviews – load approved reviews from Admin › Reviews Moderation
+</script>
+</body>
+</html>

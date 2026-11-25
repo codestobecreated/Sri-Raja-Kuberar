@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pooja Booking – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main id="page"></main>
+<div id="site-footer"></div>
+
+<script>
+const P = POOJAS.find(x => x.id === qs('id')) || POOJAS[0];
+const TP = TEMPLES.find(x => x.id === P.temple);
+const PR = PRIESTS[P.priest];
+document.title = P.name + ' – Book Online | Sri Raja Kuberar';
+const RATES = { INR: 1, USD: 0.012, SGD: 0.016, MYR: 0.053, AED: 0.044 };
+const SYM = { INR: '₹', USD: '$', SGD: 'S$', MYR: 'RM', AED: 'AED ' };
+const PRASADAM_FEE = 99;
+
+// ---------- Booking state ----------
+const S = {
+  step: 1, pkg: P.pkgs[0].id, date: qs('date') || P.date, members: [], gift: qs('gift') === '1', giftTo: { name: '', phone: '', msg: '' },
+  contact: { name: user()?.name || '', mobile: user()?.mobile || '', email: '', verified: !!user() },
+  prasadam: true, address: { line: '', city: '', pin: '', country: 'India' }, coupon: '', discount: 0,
+  currency: 'INR', method: 'upi', saveFamily: false
+};
+const pkg = () => P.pkgs.find(k => k.id === S.pkg);
+function syncMembers() { const n = pkg().persons; while (S.members.length < n) S.members.push({ name: '', nak: '', rasi: '', goth: GOTHRAMS[0] }); S.members.length = n; }
+syncMembers();
+const totals = () => { const base = pkg().price, del = S.prasadam ? PRASADAM_FEE : 0, disc = Math.round(base * S.discount); return { base, del, disc, total: base + del - disc }; };
+const money = inr => S.currency === 'INR' ? rupee(inr) : SYM[S.currency] + (inr * RATES[S.currency]).toFixed(2);
+
+// ---------- Page layout ----------
+const info = (icon, k, v) => `<div class="bg-white/10 rounded-2xl px-4 py-3"><p class="text-[11px] uppercase tracking-wider text-temple-100/80">${k}</p><b class="text-white">${icon} ${v}</b></div>`;
+$('#page').innerHTML = `
+<section class="kolam-bg text-white">
+  <div class="max-w-7xl mx-auto px-4 py-8 md:py-10">
+    <nav class="text-sm text-temple-100/80"><a href="index.html" class="hover:text-gold-300">${t('home')}</a> / <a href="poojas.html" class="hover:text-gold-300">${t('poojas')}</a> / <span class="text-white">${esc(L(P))}</span></nav>
+    <a href="temple.html?id=${TP.id}" class="chip bg-gold-400 text-temple-900 mt-4">🛕 ${esc(L(TP))}, ${esc(TP.city)}</a>
+    <h1 class="font-display text-3xl md:text-5xl text-gold-100 mt-3">${esc(L(P))}</h1>
+    <p class="mt-2 text-temple-50/90">${esc(P.tagline)}</p>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+      ${info('📅', 'Pooja Date', fmtDate(S.date))}${info('⏰', 'Auspicious Time', P.time)}${info('⏳', 'Booking Cutoff', fmtDate(P.cutoff))}${info('🕉️', 'Sankalpam Type', P.sankalpam)}
+    </div>
+  </div>
+</section>
+<section class="max-w-7xl mx-auto px-4 py-10 grid lg:grid-cols-5 gap-8 items-start">
+  <div class="lg:col-span-3 space-y-8 min-w-0">
+    <div class="relative rounded-3xl overflow-hidden">${imgTag(P.img, 'w-full aspect-[16/10] object-cover', P.name)}
+      <div class="absolute top-4 left-4 flex gap-2">${P.live ? '<span class="chip bg-red-600 text-white"><span class="w-2 h-2 rounded-full bg-white pulse-dot"></span>Streamed live</span>' : ''}<span class="chip bg-white text-temple-800">⭐ ${P.rating} · ${P.booked.toLocaleString('en-IN')}+ booked</span></div>
+      <button id="wish-btn" class="absolute top-4 right-4 btn bg-white text-sm !py-2">${wish.has(P.id) ? '❤️ Saved' : '🤍 Save for later'}</button>
+    </div>
+    <div class="card p-6"><h2 class="font-display text-2xl text-temple-900">About this sacred ritual</h2><p class="mt-3 text-gray-700 leading-relaxed">${esc(P.about)}</p></div>
+    <div class="card p-6"><h2 class="font-display text-2xl text-temple-900">Key divine benefits</h2>
+      <div class="grid sm:grid-cols-2 gap-4 mt-4">${P.benefits.map(b => `<div class="rounded-2xl bg-gold-50 p-4"><b class="text-temple-900">🪔 ${esc(b[0])}</b><p class="text-sm text-gray-600 mt-1">${esc(b[1])}</p></div>`).join('')}</div></div>
+    <div class="card p-6"><h2 class="font-display text-2xl text-temple-900">🎬 Sample video</h2><p class="text-sm text-gray-600 mt-1">This is how your pooja will be performed and recorded.</p>
+      <div class="mt-4 aspect-video rounded-2xl overflow-hidden bg-black relative">${P.video ? `<iframe class="w-full h-full" src="${P.video}" title="Sample pooja video" loading="lazy" allowfullscreen></iframe>` : `${imgTag(P.img, 'w-full h-full object-cover opacity-70')}<div class="absolute inset-0 grid place-items-center text-center text-white"><div><span class="w-16 h-16 mx-auto rounded-full bg-white/90 grid place-items-center text-2xl text-temple-800">▶</span><p class="text-xs mt-2 opacity-80">Set the YouTube embed URL in Admin › Poojas (field: video)</p></div></div>`}</div></div>
+    <div class="grid sm:grid-cols-2 gap-6">
+      <div class="card p-6"><h3 class="font-bold text-temple-900 mb-3">🧘 Your priest (Archakar)</h3>
+        <div class="flex gap-4 items-center">${imgTag(PR.img, 'w-20 h-20 rounded-2xl object-cover bg-temple-50', PR.name)}<div><b class="text-temple-900">${esc(PR.name)}</b><p class="text-sm text-gray-600">${PR.exp} years experience</p><p class="text-xs text-gold-700 font-semibold mt-1">${esc(PR.spec)}</p></div></div></div>
+      <div class="card p-6"><h3 class="font-bold text-temple-900 mb-3">📜 Temple authorization</h3>
+        <p class="text-sm text-gray-600">This booking service is officially authorised by ${esc(TP.name)}. Payments go to the trust account.</p>
+        <button id="auth-btn" class="btn btn-outline text-sm !py-2 mt-3">View authorization letter</button></div>
+    </div>
+    <div class="card p-6"><h3 class="font-bold text-temple-900 mb-3">📦 What you receive</h3>
+      <ul class="grid sm:grid-cols-2 gap-2 text-sm text-gray-700"><li>✅ Sankalpam in each family member's name</li><li>✅ Video & photos on WhatsApp</li><li>✅ Live stream link (1 day before)</li><li>✅ Prasadam by courier with tracking</li><li>✅ Downloadable receipt & sankalpam certificate</li><li>✅ SMS, email & WhatsApp updates at every stage</li></ul></div>
+    <div class="card p-6" id="reviews"><div class="flex items-center justify-between flex-wrap gap-3"><h2 class="font-display text-2xl text-temple-900">Devotee reviews</h2><button id="write-review" class="btn btn-outline text-sm !py-2">✍ Write a review</button></div>
+      <p class="text-sm text-gray-600 mt-1">⭐ ${P.rating} average from ${P.reviews} verified bookings</p>
+      <div class="grid gap-4 mt-4">${REVIEWS.filter((r, i) => i < 3).map(reviewCard).join('')}</div></div>
+  </div>
+
+  <!-- Booking widget -->
+  <aside class="lg:col-span-2 lg:sticky lg:top-24" id="book">
+    <div class="rounded-3xl overflow-hidden shadow-soft border border-temple-100 bg-white">
+      <div class="bg-temple-800 px-5 py-4"><div id="stepper" class="flex items-center justify-between"></div></div>
+      <div id="step-body" class="p-5 md:p-6"></div>
+    </div>
+    <p class="text-xs text-center text-gray-500 mt-3">🔒 Secured by Razorpay / Stripe · Need help? <a class="text-temple-700 font-semibold" href="https://wa.me/${SITE.phoneRaw}">WhatsApp us</a></p>
+  </aside>
+</section>
+<section class="max-w-7xl mx-auto px-4 pb-16"><h2 class="font-display text-3xl text-temple-900 mb-6">You may also like</h2>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">${POOJAS.filter(x => x.id !== P.id).slice(0, 4).map(poojaCard).join('')}</div></section>`;
+
+$('#wish-btn').onclick = e => { e.currentTarget.textContent = wish.toggle(P.id) ? '❤️ Saved' : '🤍 Save for later'; };
+$('#auth-btn').onclick = () => modal(`<div class="p-8"><div class="border-4 border-double border-gold-500 rounded-xl p-6 bg-gold-50 font-serif">
+  <p class="text-center text-xs tracking-widest text-gold-700">ஓம் நமசிவாய</p><h3 class="text-center font-display text-2xl text-temple-900 mt-2">${esc(TP.name)}</h3><p class="text-center text-xs text-gray-500">${esc(TP.city)}</p>
+  <p class="mt-6 text-sm leading-relaxed text-gray-800">To whom it may concern,<br><br>This is to certify that <b>${esc(SITE.name)}</b> is authorised to accept online bookings for poojas, homams and archanas performed at our temple, and to deliver prasadam to devotees on our behalf.</p>
+  <p class="mt-6 text-sm">Ref No: AUTH/${new Date().getFullYear()}/${TP.id.toUpperCase().slice(0, 4)}/017</p>
+  <div class="mt-8 flex justify-between items-end"><div class="text-xs text-gray-500">Date: 01 Apr ${new Date().getFullYear()}</div><div class="text-center"><div class="w-24 h-24 rounded-full border-2 border-maroon-600 text-maroon-600 grid place-items-center text-[10px] font-bold rotate-[-12deg]">TEMPLE<br>SEAL</div><p class="text-xs mt-1">Executive Officer</p></div></div>
+  </div><p class="text-xs text-gray-500 mt-3 text-center">Sample letter – replace with the scanned original in Admin › Temples & Priests.</p></div>`);
+$('#write-review').onclick = () => {
+  const mine = store.get('bookings', []).filter(b => b.pooja === P.id);
+  if (!mine.length) return modal(`<div class="p-8 text-center"><div class="text-5xl">🔒</div><h3 class="font-display text-2xl text-temple-900 mt-3">Only verified devotees can review</h3><p class="text-gray-600 mt-2 text-sm">Reviews are open to devotees who have booked this pooja. This keeps every review genuine.</p><a href="#book" data-close class="btn btn-gold mt-5">Book this pooja</a></div>`);
+  const m = modal(`<form class="p-8"><h3 class="font-display text-2xl text-temple-900">Review ${esc(P.name)}</h3><span class="chip bg-temple-50 text-temple-700 mt-2">✔ Verified booking ${mine[0].id}</span>
+    <label class="label mt-4">Rating</label><select class="field" name="r"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select>
+    <label class="label mt-3">Your review</label><textarea class="field" rows="4" required name="t"></textarea><button class="btn btn-green mt-4 w-full">Submit review</button></form>`);
+  $('form', m).onsubmit = e => { e.preventDefault(); m.remove(); toast('🙏 Thank you! Your review will appear after moderation.'); };
+};
+
+// ---------- Stepper ----------
+const STEPS = ['Package', 'Sankalpam', 'Contact', 'Payment', 'Done'];
+function renderStepper() {
+  $('#stepper').innerHTML = STEPS.map((s, i) => { const n = i + 1, on = n === S.step, done = n < S.step;
+    return `<div class="flex flex-col items-center gap-1 flex-1 relative">
+      ${i ? `<span class="absolute top-4 right-1/2 w-full h-0.5 ${done || on ? 'bg-gold-400' : 'bg-white/20'} -z-0"></span>` : ''}
+      <span class="relative z-10 w-8 h-8 rounded-full grid place-items-center text-sm font-bold ${on ? 'bg-gold-400 text-temple-900 ring-4 ring-gold-400/30' : done ? 'bg-gold-200 text-temple-900' : 'bg-white/15 text-white/70'}">${done ? '✓' : n}</span>
+      <span class="text-[10px] ${on ? 'text-gold-200 font-bold' : 'text-white/60'}">${s}</span></div>`; }).join('');
+}
+const nav = (back, next, nextLabel) => `<div class="flex gap-3 mt-6">${back ? `<button class="btn btn-outline" data-back>← Back</button>` : ''}<button class="btn btn-gold flex-1" data-next ${next ? '' : 'disabled'}>${nextLabel} →</button></div>`;
+const opt = (arr, sel, ph) => `<option value="">${ph}</option>` + arr.map(v => `<option ${v === sel ? 'selected' : ''}>${v}</option>`).join('');
+
+function render() {
+  renderStepper();
+  const B = $('#step-body'), T = totals();
+  if (S.step === 1) {
+    B.innerHTML = `<h3 class="font-display text-2xl text-temple-900">Step 1: Select seva package</h3><p class="text-sm text-gray-600 mt-1">Choose the package suited to your family's sankalpam.</p>
+      <div class="space-y-3 mt-4">${P.pkgs.map(k => `<label class="block cursor-pointer rounded-2xl border-2 border-gray-200 p-4 transition ${k.id === S.pkg ? 'pkg-selected' : 'hover:border-gold-300'}">
+        <input type="radio" name="pkg" value="${k.id}" class="sr-only" ${k.id === S.pkg ? 'checked' : ''}>
+        <div class="flex justify-between items-start"><div><b class="text-temple-900 text-lg">${L(k)} (${k.persons} ${k.persons > 1 ? 'Persons' : 'Person'})</b><p class="text-xs text-gray-500 mt-1">👥 Max devotees: ${k.persons}</p><p class="text-xs text-temple-700 mt-1">✓ Yagna prasadam · ✓ Video proof</p></div>
+        <div class="text-right">${k.id === S.pkg ? '<span class="chip bg-gold-400 text-temple-900 mb-1">Selected ✓</span>' : ''}<b class="block text-2xl text-temple-700">${rupee(k.price)}</b><s class="text-sm text-gray-400">${rupee(k.mrp)}</s><p class="text-[11px] text-green-700 font-bold">${Math.round((1 - k.price / k.mrp) * 100)}% OFF</p></div></div></label>`).join('')}</div>
+      <label class="label mt-5">Pooja date</label><select class="field" id="date">${[...new Set([P.date, S.date, ...SPECIAL_DAYS.filter(d => d.pooja === P.id).map(d => d.date)])].sort().map(d => `<option value="${d}" ${d === S.date ? 'selected' : ''}>${fmtDate(d, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })}</option>`).join('')}</select>
+      <label class="flex items-center gap-2 mt-4 text-sm cursor-pointer"><input type="checkbox" id="gift" ${S.gift ? 'checked' : ''} class="w-4 h-4 accent-temple-600"> 🎁 Gift this pooja to parents / friends (greeting card on WhatsApp)</label>
+      ${nav(false, true, 'Proceed to Sankalpam details')}`;
+    $$('input[name=pkg]', B).forEach(r => r.onchange = () => { S.pkg = r.value; syncMembers(); render(); });
+    $('#date').onchange = e => S.date = e.target.value;
+    $('#gift').onchange = e => S.gift = e.target.checked;
+  }
+  if (S.step === 2) {
+    const fam = store.get('family', []);
+    B.innerHTML = `<h3 class="font-display text-2xl text-temple-900">Step 2: Sankalpam details</h3><p class="text-sm text-gray-600 mt-1">Enter details for each family member (${pkg().persons}). Names are chanted during the sankalpam.</p>
+      ${fam.length ? `<div class="mt-4 rounded-2xl bg-temple-50 p-3 flex flex-wrap items-center gap-2"><span class="text-sm font-semibold text-temple-800">⚡ Saved family:</span><button class="btn btn-green text-xs !py-1.5 !px-3" id="use-fam">Fill from my family profile (${fam.length})</button></div>` : ''}
+      ${S.gift ? `<div class="mt-4 rounded-2xl border-2 border-dashed border-gold-400 bg-gold-50 p-4"><b class="text-temple-900">🎁 Gift details</b>
+        <div class="grid grid-cols-2 gap-3 mt-3"><div><label class="label">Recipient name</label><input class="field" data-g="name" value="${esc(S.giftTo.name)}"></div><div><label class="label">Recipient WhatsApp</label><input class="field" data-g="phone" value="${esc(S.giftTo.phone)}" inputmode="tel"></div></div>
+        <label class="label mt-3">Greeting message</label><input class="field" data-g="msg" value="${esc(S.giftTo.msg)}" placeholder="With love and prayers for your health..."></div>` : ''}
+      <div class="space-y-4 mt-4 max-h-[52vh] overflow-y-auto pr-1">${S.members.map((m, i) => `<div class="rounded-2xl border border-gray-200 p-4"><b class="text-sm text-gold-700">Devotee ${i + 1}${i === 0 ? ' (main)' : ''}</b>
+        <div class="grid grid-cols-2 gap-3 mt-2">
+          <div class="col-span-2"><label class="label">Full name *</label><input class="field" data-i="${i}" data-k="name" value="${esc(m.name)}" placeholder="e.g. Ramesh Kumar"></div>
+          <div><label class="label">நட்சத்திரம் (Nakshatra) *</label><select class="field" data-i="${i}" data-k="nak">${opt(NAKSHATRAS, m.nak, 'தேர்வு செய்க')}</select></div>
+          <div><label class="label">ராசி (Rasi) *</label><select class="field" data-i="${i}" data-k="rasi">${opt(RASIS, m.rasi, 'தேர்வு செய்க')}</select></div>
+          <div class="col-span-2"><label class="label">கோத்திரம் (Gothram)</label><select class="field" data-i="${i}" data-k="goth">${opt(GOTHRAMS, m.goth, 'Select')}</select><p class="text-[11px] text-gray-500 mt-1">Don't know your gothram? Keep "Shiva Gothram".</p></div>
+        </div></div>`).join('')}</div>
+      ${user() ? `<label class="flex items-center gap-2 mt-4 text-sm cursor-pointer"><input type="checkbox" id="savefam" ${S.saveFamily ? 'checked' : ''} class="w-4 h-4 accent-temple-600"> Save these names to my family profiles for one-click booking</label>` : `<p class="text-xs text-gray-500 mt-3">💡 <a href="login.html" class="text-temple-700 font-semibold">Login</a> to save family profiles and book with one click next time.</p>`}
+      <p id="err" class="text-sm text-red-600 mt-3 hidden"></p>
+      ${nav(true, true, 'Continue')}`;
+    $$('[data-i]', B).forEach(f => f.oninput = f.onchange = () => S.members[f.dataset.i][f.dataset.k] = f.value);
+    $$('[data-g]', B).forEach(f => f.oninput = () => S.giftTo[f.dataset.g] = f.value);
+    if ($('#use-fam')) $('#use-fam').onclick = () => { fam.slice(0, S.members.length).forEach((f, i) => S.members[i] = { ...f }); render(); toast('Family details filled ✨'); };
+    if ($('#savefam')) $('#savefam').onchange = e => S.saveFamily = e.target.checked;
+  }
+  if (S.step === 3) {
+    B.innerHTML = `<h3 class="font-display text-2xl text-temple-900">Step 3: Contact & prasadam</h3><p class="text-sm text-gray-600 mt-1">No account needed – we verify your mobile with an OTP.</p>
+      <div class="grid gap-3 mt-4">
+        <div><label class="label">Your name *</label><input class="field" id="c-name" value="${esc(S.contact.name || S.members[0].name)}"></div>
+        <div><label class="label">Mobile / WhatsApp number *</label><div class="flex gap-2"><input class="field" id="c-mob" inputmode="tel" placeholder="+91 98765 43210" value="${esc(S.contact.mobile)}" ${S.contact.verified ? 'disabled' : ''}>
+          ${S.contact.verified ? '<span class="chip bg-green-100 text-green-700 shrink-0">✓ Verified</span>' : '<button class="btn btn-green shrink-0 !px-3 text-sm" id="send-otp">Send OTP</button>'}</div></div>
+        <div id="otp-row" class="hidden"><label class="label">Enter OTP</label><div class="flex gap-2"><input class="field tracking-[.5em] text-center font-bold" id="otp" maxlength="4" inputmode="numeric"><button class="btn btn-gold shrink-0 text-sm" id="verify">Verify</button></div></div>
+        <div><label class="label">Email (for receipt)</label><input class="field" id="c-email" type="email" value="${esc(S.contact.email)}"></div>
+      </div>
+      <label class="flex items-center gap-2 mt-5 text-sm font-semibold cursor-pointer"><input type="checkbox" id="pras" ${S.prasadam ? 'checked' : ''} class="w-4 h-4 accent-temple-600"> 📦 Send prasadam to my address (+${rupee(PRASADAM_FEE)})</label>
+      <div id="addr" class="grid grid-cols-2 gap-3 mt-3 ${S.prasadam ? '' : 'hidden'}">
+        <div class="col-span-2"><label class="label">Address</label><textarea class="field" rows="2" id="a-line">${esc(S.address.line)}</textarea></div>
+        <div><label class="label">City</label><input class="field" id="a-city" value="${esc(S.address.city)}"></div><div><label class="label">PIN / ZIP</label><input class="field" id="a-pin" value="${esc(S.address.pin)}"></div>
+        <div class="col-span-2"><label class="label">Country</label><select class="field" id="a-country">${['India', 'Singapore', 'Malaysia', 'UAE', 'USA', 'UK', 'Other'].map(c => `<option ${c === S.address.country ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+      </div>
+      <p id="err" class="text-sm text-red-600 mt-3 hidden"></p>
+      ${nav(true, true, 'Continue to payment')}`;
+    const save = () => { S.contact.name = $('#c-name').value; if (!S.contact.verified) S.contact.mobile = $('#c-mob').value; S.contact.email = $('#c-email').value;
+      if (S.prasadam) Object.assign(S.address, { line: $('#a-line').value, city: $('#a-city').value, pin: $('#a-pin').value, country: $('#a-country').value }); };
+    B.oninput = save;
+    if ($('#send-otp')) $('#send-otp').onclick = () => { if (sendOtp($('#c-mob').value)) { $('#otp-row').classList.remove('hidden'); $('#otp').focus(); } };
+    if ($('#verify')) $('#verify').onclick = () => { if (verifyOtp($('#otp').value)) { save(); S.contact.verified = true; toast('✓ Mobile verified'); render(); } else toast('Incorrect OTP'); };
+    $('#pras').onchange = e => { save(); S.prasadam = e.target.checked; $('#addr').classList.toggle('hidden', !S.prasadam); };
+  }
+  if (S.step === 4) {
+    B.innerHTML = `<h3 class="font-display text-2xl text-temple-900">Step 4: Payment</h3>
+      <div class="rounded-2xl bg-cream border border-gold-200 p-4 mt-4 text-sm space-y-2">
+        <div class="flex justify-between"><span>${esc(P.name)}<br><span class="text-xs text-gray-500">${L(pkg())} · ${pkg().persons} devotee(s) · ${fmtDate(S.date)}</span></span><b>${money(T.base)}</b></div>
+        ${T.del ? `<div class="flex justify-between"><span>Prasadam delivery</span><b>${money(T.del)}</b></div>` : ''}
+        ${T.disc ? `<div class="flex justify-between text-green-700"><span>Coupon ${esc(S.coupon)}</span><b>− ${money(T.disc)}</b></div>` : ''}
+        <div class="flex justify-between border-t border-gold-200 pt-2 text-base"><b>Total</b><b class="text-temple-700 text-xl">${money(T.total)}</b></div>
+      </div>
+      <div class="flex gap-2 mt-4"><input class="field" id="coupon" placeholder="Coupon or referral code (try PRADOSHAM10)" value="${esc(S.coupon)}"><button class="btn btn-outline shrink-0 text-sm" id="apply">Apply</button></div>
+      <label class="label mt-4">Currency</label>
+      <div class="grid grid-cols-5 gap-2">${Object.keys(RATES).map(c => `<button class="rounded-xl border-2 py-2 text-sm font-bold ${c === S.currency ? 'border-gold-400 bg-gold-50 text-temple-900' : 'border-gray-200 text-gray-600'}" data-cur="${c}">${c}</button>`).join('')}</div>
+      <label class="label mt-4">Payment method</label>
+      <div class="grid grid-cols-2 gap-2">${(S.currency === 'INR' ? [['upi', '📱 UPI'], ['card', '💳 Card'], ['nb', '🏦 Netbanking'], ['wallet', '👛 Wallet']] : [['card', '💳 International card'], ['stripe', '🌐 Stripe / PayPal']]).map(m => `<button class="rounded-xl border-2 py-3 text-sm font-semibold ${m[0] === S.method ? 'border-temple-600 bg-temple-50 text-temple-800' : 'border-gray-200'}" data-m="${m[0]}">${m[1]}</button>`).join('')}</div>
+      <p class="text-xs text-gray-500 mt-3">${S.currency === 'INR' ? 'Processed securely by Razorpay.' : 'International payment via Razorpay International / Stripe. Amount shown is approximate; final charge in ' + S.currency + '.'}</p>
+      <label class="flex items-start gap-2 mt-4 text-xs text-gray-600"><input type="checkbox" id="agree" class="mt-0.5 accent-temple-600"> I agree to the <a href="policy.html?p=terms" target="_blank" class="text-temple-700 underline">Terms</a> and <a href="policy.html?p=refund" target="_blank" class="text-temple-700 underline">Refund Policy</a>.</label>
+      <p id="err" class="text-sm text-red-600 mt-3 hidden"></p>
+      ${nav(true, true, '🔒 Pay ' + money(T.total))}`;
+    $('#apply').onclick = () => { const c = $('#coupon').value.trim().toUpperCase(); const codes = { PRADOSHAM10: .1, FIRST15: .15, ...(store.get('refCode') ? { [store.get('refCode')]: .1 } : {}) };
+      if (codes[c] || /^RKREF/.test(c)) { S.coupon = c; S.discount = codes[c] || .1; toast('🎉 Coupon applied'); } else { S.coupon = ''; S.discount = 0; toast('Invalid coupon'); } render(); };
+    $$('[data-cur]', B).forEach(b => b.onclick = () => { S.currency = b.dataset.cur; S.method = S.currency === 'INR' ? 'upi' : 'card'; render(); });
+    $$('[data-m]', B).forEach(b => b.onclick = () => { S.method = b.dataset.m; render(); });
+  }
+  if (S.step === 5) {
+    const bk = S.booking;
+    B.innerHTML = `<div class="text-center"><div class="w-20 h-20 mx-auto rounded-full bg-green-100 grid place-items-center text-4xl">✅</div>
+      <h3 class="font-display text-2xl text-temple-900 mt-3">Booking confirmed!</h3><p class="text-sm text-gray-600 mt-1">Om Namah Shivaya 🙏 Confirmation sent on WhatsApp, SMS${bk.email ? ' and email' : ''}.</p>
+      <div class="rounded-2xl bg-gold-50 border border-gold-200 p-4 mt-4"><p class="text-xs text-gray-500">Booking ID</p><b class="text-2xl tracking-wider text-temple-800">${bk.id}</b><p class="text-xs text-gray-600 mt-1">${esc(P.name)} · ${fmtDate(bk.date)} · ${P.time}</p></div></div>
+      <ol class="mt-5 space-y-2 text-sm">${['Booked', 'Sankalpam received', 'Pooja in progress', 'Video sent', 'Prasadam dispatched', 'Delivered'].map((s, i) => `<li class="flex items-center gap-3"><span class="w-6 h-6 rounded-full grid place-items-center text-xs ${i === 0 ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-400'}">${i === 0 ? '✓' : i + 1}</span>${s}</li>`).join('')}</ol>
+      <div class="grid grid-cols-2 gap-2 mt-5">
+        <a href="track.html?id=${bk.id}" class="btn btn-green text-sm">📍 Track booking</a>
+        <a href="receipt.html?id=${bk.id}" target="_blank" class="btn btn-outline text-sm">🧾 Receipt (PDF)</a>
+        <a href="receipt.html?id=${bk.id}&type=cert" target="_blank" class="btn btn-outline text-sm">📜 Sankalpam certificate</a>
+        <a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(P.name)}&dates=${bk.date.replace(/-/g, '')}/${bk.date.replace(/-/g, '')}" target="_blank" rel="noopener" class="btn btn-outline text-sm">📅 Add to calendar</a>
+      </div>
+      ${bk.gift ? `<a target="_blank" rel="noopener" href="https://wa.me/${bk.gift.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`🙏 ${bk.gift.name}, a ${P.name} is being performed in your name at ${TP.name} on ${fmtDate(bk.date)}. ${bk.gift.msg}`)}" class="btn w-full mt-3 bg-[#25D366] text-white text-sm">🎁 Send greeting card on WhatsApp</a>` : ''}
+      <a href="https://wa.me/?text=${encodeURIComponent('I just booked ' + P.name + ' at ' + TP.name + '. Book yours: ' + location.href.split('?')[0] + '?id=' + P.id + (store.get('refCode') ? '&ref=' + store.get('refCode') : ''))}" target="_blank" rel="noopener" class="block text-center text-sm text-temple-700 font-semibold mt-4">Invite friends & both get 10% off →</a>`;
+  }
+  const back = $('[data-back]', B), next = $('[data-next]', B);
+  if (back) back.onclick = () => { S.step--; render(); };
+  if (next) next.onclick = () => { const e = validate(); if (e) { const el = $('#err'); el.textContent = e; el.classList.remove('hidden'); return; } if (S.step === 4) return pay(); S.step++; render(); $('#book').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+}
+function validate() {
+  if (S.step === 2) {
+    if (S.members.some(m => !m.name.trim() || !m.nak || !m.rasi)) return 'Please fill name, nakshatra and rasi for every devotee.';
+    if (S.gift && (!S.giftTo.name || !S.giftTo.phone)) return 'Please enter recipient name and WhatsApp number for the gift.';
+  }
+  if (S.step === 3) {
+    if (!S.contact.name.trim()) return 'Please enter your name.';
+    if (!S.contact.verified) return 'Please verify your mobile number with OTP.';
+    if (S.prasadam && (!S.address.line || !S.address.city || !S.address.pin)) return 'Please enter the delivery address for prasadam.';
+  }
+  if (S.step === 4 && !$('#agree').checked) return 'Please accept the terms to continue.';
+}
+function pay() {
+  const btn = $('[data-next]'); btn.disabled = true; btn.textContent = 'Processing payment…';
+  setTimeout(() => {
+    const T = totals();
+    const bk = { id: genId(), pooja: P.id, name: P.name, temple: TP.name, date: S.date, time: P.time, pkg: pkg().name, members: S.members, contact: S.contact.name, mobile: S.contact.mobile, email: S.contact.email,
+      amount: T.total, currency: S.currency, method: S.method, prasadam: S.prasadam, address: S.prasadam ? S.address : null, gift: S.gift ? S.giftTo : null, created: new Date().toISOString(), status: 0, courier: null };
+    const all = store.get('bookings', []); all.unshift(bk); store.set('bookings', all);
+    if (S.saveFamily) { const fam = store.get('family', []); S.members.forEach(m => { if (!fam.some(f => f.name === m.name)) fam.push({ ...m }); }); store.set('family', fam); }
+    if (!user()) store.set('user', { name: S.contact.name, mobile: S.contact.mobile, guest: true });
+    S.booking = bk; S.step = 5; render();
+  }, 1400);
+}
+render();
+</script>
+</body>
+</html>

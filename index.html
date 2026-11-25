@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sri Raja Kuberar – Online Pooja Booking, Live Darshan & Prasadam</title>
+<meta name="description" content="Book authentic Vedic poojas, homams and archanas at Om Sri Raja Kubera Siddhar Peedam. Live streaming, video proof on WhatsApp and prasadam delivery.">
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main id="home"></main>
+<div id="site-footer"></div>
+
+<script>
+const today = new Date().toISOString().slice(0, 10);
+const upcoming = [...POOJAS].filter(p => p.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+const NEXT = upcoming.find(p => p.live) || upcoming[0] || POOJAS[0];
+const P = panchang();
+const head = (eyebrow, title, sub = '', light = false) => `<div class="text-center max-w-2xl mx-auto reveal">
+  <p class="eyebrow ${light ? '!text-gold-400' : ''}">${eyebrow}</p>
+  <h2 class="font-display text-4xl md:text-5xl font-semibold mt-3 leading-tight ${light ? 'gold-text' : 'text-temple-900'}">${title}</h2>
+  <div class="mt-4">${divider(light ? 'text-gold-400' : 'text-gold-500')}</div>
+  ${sub ? `<p class="mt-4 ${light ? 'text-stone-300' : 'text-stone-600'}">${sub}</p>` : ''}</div>`;
+const minPrice = p => Math.min(...p.pkgs.map(k => k.price));
+
+$('#home').innerHTML = `
+<!-- ============ HERO ============ -->
+<section class="relative overflow-hidden night-bg text-white">
+  <div class="absolute inset-0">${imgTag(IMG.diyas, 'w-full h-full object-cover opacity-35', 'Lamps glowing in the temple')}</div>
+  <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_40%,transparent_0%,rgba(15,6,4,.75)_55%,#0f0604_100%)]"></div>
+  <div class="absolute -left-40 top-1/2 -translate-y-1/2 w-[46rem] h-[46rem] text-gold-400/15 animate-spin-slow pointer-events-none">${mandala('w-full h-full')}</div>
+  <div class="relative max-w-7xl mx-auto px-4 pt-16 pb-32 md:pt-24 md:pb-40 grid lg:grid-cols-12 gap-12 items-center">
+    <div class="lg:col-span-7 fade-up">
+      <p class="font-tamil text-gold-300 text-lg md:text-xl tracking-wide">ஓம் ஸ்ரீ ராஜ குபேராய நமஹ</p>
+      <h1 class="font-display font-semibold text-5xl sm:text-6xl lg:text-7xl leading-[1.02] mt-4 gold-text">${t('heroTitle')}</h1>
+      <p class="mt-6 text-lg text-stone-300 max-w-xl leading-relaxed">${t('heroSub')}</p>
+      <div class="mt-9 flex flex-wrap gap-3">
+        <a href="poojas.html" class="btn btn-gold text-base !px-7 !py-3.5">${ic('diya')} ${t('book')}</a>
+        <a href="live.html" class="btn btn-ghost !px-6 !py-3.5"><span class="w-2 h-2 rounded-full bg-red-500 pulse-dot"></span> Watch Live Darshan</a>
+      </div>
+      <div class="mt-12 flex flex-wrap items-center gap-x-10 gap-y-5">
+        ${[['25,000+', 'Poojas performed'], ['4.9 ★', 'Devotee rating'], ['18', 'Countries served']].map(s => `<div><b class="font-display text-4xl text-gold-200 font-semibold">${s[0]}</b><p class="text-xs uppercase tracking-[.18em] text-stone-400 mt-1">${s[1]}</p></div>`).join('<span class="hidden sm:block w-px h-10 bg-white/15"></span>')}
+      </div>
+    </div>
+    <!-- Next maha pooja card -->
+    <div class="lg:col-span-5 fade-up">
+      <div class="relative rounded-[2rem] p-[1px] bg-gradient-to-b from-gold-300/70 via-gold-500/20 to-transparent shadow-glow">
+        <div class="rounded-[2rem] bg-night-900/85 backdrop-blur-xl overflow-hidden">
+          <div class="relative h-52">${imgTag(NEXT.img, 'w-full h-full object-cover', NEXT.name)}<div class="absolute inset-0 bg-gradient-to-t from-night-900 to-transparent"></div>
+            <span class="absolute top-4 left-4 chip bg-gold-400 text-night-950">${ic('sparkle', 'w-3.5 h-3.5')} Next Maha Pooja</span></div>
+          <div class="p-6 -mt-10 relative">
+            <h3 class="font-display text-3xl leading-tight text-white">${esc(L(NEXT))}</h3>
+            <p class="text-sm text-stone-400 mt-1 flex items-center gap-1.5">${ic('temple', 'w-4 h-4 text-gold-400')} ${esc(L(TEMPLES.find(x => x.id === NEXT.temple)))}</p>
+            <div id="countdown" class="grid grid-cols-4 gap-2 mt-5 text-center"></div>
+            <div class="flex items-center justify-between mt-6 pt-5 border-t border-white/10">
+              <div><p class="text-xs text-stone-400">${fmtDate(NEXT.date, { weekday: 'short', day: 'numeric', month: 'short' })} · ${NEXT.time}</p><b class="text-2xl text-gold-200">${rupee(minPrice(NEXT))} <span class="text-sm font-normal text-stone-400">onwards</span></b></div>
+              <a href="pooja.html?id=${NEXT.id}" class="btn btn-gold !py-2.5">Book ${ic('arrow', 'w-4 h-4')}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- temple arch edge -->
+  <svg class="absolute bottom-0 left-0 w-full h-16 md:h-24 text-cream" viewBox="0 0 1440 100" preserveAspectRatio="none" aria-hidden="true"><path fill="currentColor" d="M0 100 V60 Q360 60 520 30 Q640 0 720 0 Q800 0 920 30 Q1080 60 1440 60 V100Z"/></svg>
+</section>
+
+<!-- ============ PANCHANGAM RIBBON ============ -->
+<section class="relative z-10 max-w-7xl mx-auto px-4 -mt-10 md:-mt-14">
+  <div class="rounded-[1.8rem] bg-ivory border border-sandal shadow-soft p-5 md:p-6 grid md:grid-cols-[auto_1fr_auto] gap-5 items-center reveal">
+    <div class="flex items-center gap-4 md:pr-6 md:border-r border-sandal">
+      <span class="w-14 h-14 rounded-2xl bg-gold-100 text-gold-700 grid place-items-center">${ic('sun', 'w-7 h-7')}</span>
+      <div><p class="eyebrow">${t('todayPanchang')}</p><b class="font-display text-2xl text-temple-900">${new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</b><p class="text-xs text-stone-500 font-tamil">${P.day_ta}</p></div>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-sm">
+      ${[['Thithi', lang === 'ta' ? P.thithi_ta : P.thithi, ''], ['Nakshatra', lang === 'ta' ? P.nakshatra_ta : P.nakshatra, ''], ['Nalla Neram', P.nalla, 'text-emerald-700'], ['Rahu Kalam', P.rahu, 'text-temple-600'], ['Yamagandam', P.yama, 'text-temple-600'], ['Sunrise', P.sunrise + ' – ' + P.sunset, '']].map(c => `<div><p class="text-[11px] uppercase tracking-wider text-stone-500">${c[0]}</p><b class="${c[2] || 'text-temple-900'} font-semibold">${c[1]}</b></div>`).join('')}
+    </div>
+    <a href="panchangam.html" class="btn btn-outline text-sm !py-2.5 justify-self-start md:justify-self-end">Full panchangam</a>
+  </div>
+</section>
+
+<!-- ============ SERVICES (temple-arch tiles) ============ -->
+<section class="paper-bg py-20 md:py-28">
+  <div class="max-w-7xl mx-auto px-4">
+    ${head('Online Services · ஆன்லைன் சேவைகள்', 'Sacred services, wherever you are', 'Choose how you would like to offer your prayers to Sri Raja Kuberar.')}
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-7 mt-14">
+      ${[['Special Darshan', 'சிறப்பு தரிசனம்', 'Priority darshan with a QR ticket', 'darshan.html', IMG.gopuramNight], ['Aarti', 'ஆர்த்தி', 'Maha Deepa Aarti in your name', 'poojas.html?cat=aarti', IMG.aarti], ['Pooja & Homam', 'பூஜை & ஹோமம்', 'With video proof on WhatsApp', 'poojas.html?cat=pooja', IMG.yagna], ['Virtual Seva', 'மெய்நிகர் சேவை', 'Annadhanam & seva from home', 'poojas.html?cat=virtual', IMG.lamp]].map((s, i) => `
+      <a href="${s[3]}" class="group text-center reveal" style="transition-delay:${i * 90}ms">
+        <div class="relative rounded-t-full rounded-b-[1.6rem] overflow-hidden aspect-[3/4] border-4 border-ivory shadow-soft ring-1 ring-gold-300/60">
+          ${imgTag(s[4], 'w-full h-full object-cover group-hover:scale-110 transition duration-700', s[0])}
+          <div class="absolute inset-0 bg-gradient-to-t from-temple-900/85 via-transparent to-transparent"></div>
+          <div class="absolute bottom-0 inset-x-0 p-4 text-white"><p class="font-tamil text-gold-200 text-sm">${s[1]}</p><b class="font-display text-2xl md:text-[1.7rem] font-semibold">${s[0]}</b></div>
+        </div>
+        <p class="text-sm text-stone-600 mt-4">${s[2]}</p>
+        <span class="inline-flex items-center gap-1 text-sm font-bold text-temple-700 mt-1 group-hover:gap-2 transition-all">Explore ${ic('arrow', 'w-4 h-4')}</span>
+      </a>`).join('')}
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURED POOJAS ============ -->
+<section class="bg-cream py-20 md:py-24">
+  <div class="max-w-7xl mx-auto px-4">
+    ${head('E-Poojas · இ-பூஜைகள்', t('featured'), 'Authentic Vedic poojas performed in your name and gothram by experienced archakars.')}
+    <div id="ptabs" class="flex justify-center flex-wrap gap-2 mt-10 reveal"></div>
+    <div id="featured" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-7 mt-10"></div>
+    <div class="text-center mt-12"><a href="poojas.html" class="btn btn-outline !px-8">View all poojas ${ic('arrow', 'w-4 h-4')}</a></div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="relative night-bg text-white py-20 md:py-28 overflow-hidden">
+  <div class="absolute -right-48 -bottom-48 w-[40rem] h-[40rem] text-gold-400/10 animate-spin-slow">${mandala('w-full h-full')}</div>
+  <div class="relative max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-14 items-center">
+    <div>
+      <div class="reveal"><p class="eyebrow !text-gold-400">Your sacred journey</p><h2 class="font-display text-4xl md:text-5xl font-semibold gold-text mt-3 leading-tight">From sankalpam to prasadam, in four simple steps</h2>
+      <p class="text-stone-400 mt-4">No account needed – just your name, mobile number and an OTP.</p></div>
+      <ol class="mt-10 space-y-2">
+        ${[['Choose your pooja & package', 'Family, Pair or Single – with clear, discounted pricing.', 'diya'], ['Share sankalpam details', 'Name, nakshatra, rasi and gothram for each family member.', 'scroll'], ['Pay securely', 'UPI, cards, netbanking or international – INR, USD, SGD, MYR, AED.', 'shield'], ['Receive video & prasadam', 'Video proof on WhatsApp, prasadam couriered with tracking.', 'truck']].map((s, i) => `
+        <li class="reveal flex gap-5 p-4 rounded-2xl hover:bg-white/[.04] transition" style="transition-delay:${i * 100}ms">
+          <div class="relative shrink-0"><span class="w-14 h-14 rounded-full border border-gold-400/50 grid place-items-center text-gold-300">${ic(s[2], 'w-6 h-6')}</span>${i < 3 ? '<span class="absolute left-1/2 top-14 w-px h-8 bg-gold-400/30"></span>' : ''}</div>
+          <div><p class="text-xs text-gold-400 font-bold tracking-[.2em]">STEP 0${i + 1}</p><b class="block font-display text-2xl text-white mt-0.5">${s[0]}</b><p class="text-sm text-stone-400 mt-1">${s[1]}</p></div></li>`).join('')}
+      </ol>
+    </div>
+    <div class="relative reveal">
+      <div class="rounded-t-full rounded-b-[2rem] overflow-hidden border border-gold-400/30 aspect-[4/5] max-w-md mx-auto">${imgTag(IMG.aarti, 'w-full h-full object-cover', 'Evening aarti')}</div>
+      <div class="absolute -bottom-6 left-0 md:-left-4 rounded-2xl bg-ivory text-temple-900 p-4 shadow-soft flex items-center gap-3 max-w-[16rem]">
+        <span class="w-11 h-11 rounded-full bg-[#25D366] text-white grid place-items-center">${WA_ICON}</span><div><b class="text-sm">Video sent on WhatsApp</b><p class="text-xs text-stone-500">within 24 hrs of your pooja</p></div></div>
+      <div class="absolute top-10 right-0 md:-right-4 rounded-2xl bg-ivory text-temple-900 p-4 shadow-soft flex items-center gap-3"><span class="w-11 h-11 rounded-full bg-gold-100 text-gold-700 grid place-items-center">${ic('truck')}</span><div><b class="text-sm">Prasadam shipped</b><p class="text-xs text-stone-500">India & 18 countries</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SPECIAL DAYS ============ -->
+<section class="paper-bg py-20 md:py-24">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="flex flex-wrap items-end justify-between gap-4 reveal">
+      <div><p class="eyebrow">Auspicious calendar · விசேஷ நாட்கள்</p><h2 class="font-display text-4xl md:text-5xl font-semibold text-temple-900 mt-2">${t('specialDays')}</h2></div>
+      <a href="calendar.html" class="btn btn-outline text-sm !py-2.5">${ic('calendar', 'w-4 h-4')} Full calendar</a>
+    </div>
+    <div id="days" class="flex gap-5 overflow-x-auto no-scrollbar snap-x mt-10 pb-4 -mx-4 px-4"></div>
+  </div>
+</section>
+
+<!-- ============ LIVE DARSHAN ============ -->
+<section class="bg-cream py-20 md:py-24">
+  <div class="max-w-7xl mx-auto px-4 grid lg:grid-cols-3 gap-8 items-stretch">
+    <a href="live.html" class="lg:col-span-2 relative rounded-[2rem] overflow-hidden min-h-[22rem] group reveal">
+      ${imgTag(IMG.gopuramNight, 'absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-1000', 'Live darshan')}
+      <div class="absolute inset-0 bg-gradient-to-tr from-night-950/90 via-night-950/40 to-transparent"></div>
+      <div class="absolute top-6 left-6 chip bg-red-600 text-white !px-3 !py-1.5"><span class="w-2 h-2 rounded-full bg-white pulse-dot"></span> LIVE NOW</div>
+      <span class="absolute inset-0 grid place-items-center"><span class="relative w-20 h-20 rounded-full bg-gold-400 text-night-950 grid place-items-center shadow-glow group-hover:scale-110 transition"><span class="absolute inset-0 rounded-full bg-gold-400/40 animate-ping"></span>${ic('play', 'w-8 h-8 ml-1')}</span></span>
+      <div class="absolute bottom-0 inset-x-0 p-7 md:p-9 text-white"><p class="eyebrow !text-gold-300">Live Darshan · நேரலை தரிசனம்</p><h3 class="font-display text-3xl md:text-4xl mt-2">${esc(LIVE[0].title)}</h3><p class="text-stone-300 text-sm mt-1">Watch major yagnas, homams and daily aarti from the peedam.</p></div>
+    </a>
+    <div class="rounded-[2rem] bg-white border border-sandal p-6 flex flex-col reveal">
+      <b class="font-display text-2xl text-temple-900">Upcoming streams</b>
+      <ul class="mt-4 space-y-4 flex-1">${LIVE.map(l => `<li class="flex gap-3 items-center">${imgTag(l.img, 'w-20 h-16 rounded-xl object-cover')}<div><b class="text-sm text-temple-900 line-clamp-2">${esc(l.title)}</b><p class="text-xs ${l.live ? 'text-red-600 font-bold' : 'text-stone-500'} flex items-center gap-1 mt-0.5">${ic('clock', 'w-3.5 h-3.5')} ${l.when}</p></div></li>`).join('')}</ul>
+      <button id="remind" class="btn btn-gold w-full mt-6">${ic('bell', 'w-4 h-4')} Remind me before streams</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRUST ============ -->
+<section class="paper-bg py-20 md:py-28">
+  <div class="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-14 items-center">
+    <div class="grid grid-cols-2 gap-4 reveal">
+      <div class="rounded-t-full rounded-b-3xl overflow-hidden aspect-[3/4] row-span-2 self-center shadow-soft">${imgTag(IMG.shiva, 'w-full h-full object-cover', 'Deity')}</div>
+      <div class="rounded-3xl overflow-hidden aspect-square shadow-soft">${imgTag(IMG.hands, 'w-full h-full object-cover', 'Prayer')}</div>
+      <div class="rounded-3xl overflow-hidden aspect-square shadow-soft">${imgTag(IMG.bell, 'w-full h-full object-cover', 'Temple bell')}</div>
+    </div>
+    <div>
+      <div class="reveal"><p class="eyebrow">${t('why')}</p><h2 class="font-display text-4xl md:text-5xl font-semibold text-temple-900 mt-3 leading-tight">Transparent, authentic & temple-authorised</h2>
+      <p class="text-stone-600 mt-4">Every pooja is performed by named priests at the temple, recorded, and shared with you – nothing is hidden.</p></div>
+      <div class="grid sm:grid-cols-2 gap-x-6 gap-y-7 mt-10">
+        ${[['video', 'Live streaming', 'Major yagnas and homams streamed live on YouTube and our site.'], ['play', 'Sample video', 'Watch how the pooja is performed before you book.'], ['users', 'Known priests', 'Archakar name, photo and years of experience on every pooja.'], ['scroll', 'Authorization letter', 'The temple\'s official letter is displayed – no fake sites.'], ['star', 'Verified reviews', 'Only devotees who actually booked can write a review.'], ['globe', 'Worldwide devotees', 'Pay in INR, USD, SGD, MYR or AED – prasadam ships abroad.']].map((f, i) => `
+        <div class="flex gap-4 reveal" style="transition-delay:${i * 70}ms"><span class="w-12 h-12 shrink-0 rounded-2xl bg-temple-50 text-temple-700 grid place-items-center">${ic(f[0], 'w-6 h-6')}</span><div><b class="text-temple-900">${f[1]}</b><p class="text-sm text-stone-600 mt-1">${f[2]}</p></div></div>`).join('')}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SWAMIGAL QUOTE ============ -->
+<section class="relative overflow-hidden text-white">
+  <div class="absolute inset-0">${imgTag(IMG.marigold, 'w-full h-full object-cover', 'Marigold flowers')}</div>
+  <div class="absolute inset-0 bg-gradient-to-r from-temple-900/95 via-temple-900/85 to-temple-800/70"></div>
+  <div class="relative max-w-4xl mx-auto px-4 py-24 md:py-32 text-center reveal">
+    <div class="w-16 h-16 mx-auto text-gold-300">${mandala('w-full h-full', [[12, 40, 14]])}</div>
+    <p class="font-tamil text-2xl md:text-4xl leading-relaxed text-gold-100 mt-8">“கொடுப்பதற்கு நான் இருக்கிறேன்!<br>பெறுவதற்கு நீ வருகிறாயா?”</p>
+    <p class="font-display italic text-xl md:text-2xl text-stone-200 mt-5">“I am here to bestow – will you come forth to receive My grace?”</p>
+    <div class="gold-line max-w-xs mx-auto mt-8"></div>
+    <p class="mt-5 font-display text-2xl text-gold-200">Sri Raja Kubera Siddhar Swamigal</p>
+    <a href="about.html" class="btn btn-ghost mt-8">Read about the Swamigal ${ic('arrow', 'w-4 h-4')}</a>
+  </div>
+</section>
+
+<!-- ============ ANNADHANAM / DONATION ============ -->
+<section class="bg-cream py-20 md:py-28">
+  <div class="max-w-7xl mx-auto px-4">
+    ${head('அன்னம் பரம்பிரம்மம் · Annam Param Brahmam', 'Step forward in divine giving', 'Food itself is the Supreme Divine. Contribute to annadhanam, goshala, education and the temple construction.')}
+    <div id="donations" class="grid lg:grid-cols-5 gap-6 mt-14 items-stretch"></div>
+    <div class="mt-10 rounded-[2rem] bg-gold-50 border border-gold-200 p-6 md:p-8 flex flex-wrap items-center justify-between gap-5 reveal">
+      <div class="flex items-center gap-4"><span class="w-14 h-14 rounded-2xl bg-gold-400 text-night-950 grid place-items-center">${ic('gift', 'w-7 h-7')}</span><div><b class="font-display text-2xl text-temple-900">Sponsor annadhanam on a special date</b><p class="text-sm text-stone-600">Birthday, anniversary or remembrance – receive photos of the seva on WhatsApp.</p></div></div>
+      <a href="donate.html" class="btn btn-green">Sponsor a date</a>
+    </div>
+  </div>
+</section>
+
+<!-- ============ DIVINE COLLECTIONS ============ -->
+<section class="paper-bg py-20 md:py-24">
+  <div class="max-w-7xl mx-auto px-4">
+    <div class="flex flex-wrap items-end justify-between gap-4 reveal"><div><p class="eyebrow">Blessed at the peedam</p><h2 class="font-display text-4xl md:text-5xl font-semibold text-temple-900 mt-2">Divine Collections</h2></div><a href="shop.html" class="btn btn-outline text-sm !py-2.5">Shop all ${ic('arrow', 'w-4 h-4')}</a></div>
+    <div id="products" class="grid grid-cols-2 lg:grid-cols-4 gap-5 md:gap-7 mt-10"></div>
+  </div>
+</section>
+
+<!-- ============ REVIEWS ============ -->
+<section class="bg-cream py-20 md:py-28">
+  <div class="max-w-7xl mx-auto px-4">
+    ${head('Devotee voices', t('reviews'), 'Rated <b class="text-temple-800">4.9 / 5</b> by devotees in India and abroad – every review is from a verified booking.')}
+    <div id="reviews" class="grid md:grid-cols-3 gap-7 mt-16"></div>
+  </div>
+</section>
+
+<!-- ============ SUBSCRIBE / APP CTA ============ -->
+<section class="max-w-7xl mx-auto px-4 pb-20">
+  <div class="relative overflow-hidden rounded-[2.2rem] kolam-bg text-white p-8 md:p-14 grid lg:grid-cols-5 gap-8 items-center reveal">
+    <div class="absolute -right-24 -top-24 w-96 h-96 text-gold-300/15 animate-spin-slow">${mandala('w-full h-full')}</div>
+    <div class="relative lg:col-span-3"><p class="eyebrow !text-gold-300">Pooja subscriptions</p><h2 class="font-display text-4xl md:text-5xl font-semibold mt-2 gold-text leading-tight">Never miss Pradosham, Pournami, Sashti or Amavasai</h2>
+      <p class="mt-4 text-stone-200 max-w-xl">Subscribe once – archana is performed automatically on every special day in your family's name, with a reminder and live link the day before.</p></div>
+    <div class="relative lg:col-span-2 flex flex-wrap lg:justify-end gap-3"><a href="subscriptions.html" class="btn btn-gold !px-7 !py-3.5">See plans from ₹151/month</a><a href="membership.html" class="btn btn-ghost !py-3.5">Become a member</a></div>
+  </div>
+</section>
+`;
+
+// ---------- Countdown ----------
+function tickCountdown() {
+  const target = new Date(NEXT.date + 'T' + (/(\d+):(\d+)\s*(AM|PM)/i.test(NEXT.time) ? (() => { let [, h, m, ap] = NEXT.time.match(/(\d+):(\d+)\s*(AM|PM)/i); h = (+h % 12) + (ap.toUpperCase() === 'PM' ? 12 : 0); return String(h).padStart(2, '0') + ':' + m; })() : '06:00') + ':00');
+  let s = Math.max(0, Math.floor((target - new Date()) / 1000));
+  const parts = [[Math.floor(s / 86400), 'Days'], [Math.floor(s % 86400 / 3600), 'Hrs'], [Math.floor(s % 3600 / 60), 'Min'], [s % 60, 'Sec']];
+  $('#countdown').innerHTML = parts.map(p => `<div class="rounded-xl bg-white/5 border border-white/10 py-2"><b class="block font-display text-3xl text-gold-200 leading-none">${String(p[0]).padStart(2, '0')}</b><span class="text-[10px] uppercase tracking-widest text-stone-400">${p[1]}</span></div>`).join('');
+}
+tickCountdown(); setInterval(tickCountdown, 1000);
+
+// ---------- Featured poojas with category tabs ----------
+const CATS = [['', 'All'], ['pooja', 'Pooja & Homam'], ['aarti', 'Aarti'], ['virtual', 'Virtual Seva'], ['darshan', 'Darshan']];
+let cat = '';
+function drawPoojas() {
+  $('#ptabs').innerHTML = CATS.map(c => `<button data-c="${c[0]}" class="px-5 py-2 rounded-full text-sm font-semibold border transition ${c[0] === cat ? 'bg-temple-700 text-white border-temple-700' : 'bg-white border-sandal text-stone-700 hover:border-gold-400'}">${c[1]}</button>`).join('');
+  $$('[data-c]').forEach(b => b.onclick = () => { cat = b.dataset.c; drawPoojas(); });
+  const list = [...POOJAS].filter(p => !cat || p.category === cat).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 6);
+  $('#featured').innerHTML = list.map(poojaCard).join('') || '<p class="col-span-full text-center text-stone-500">Coming soon.</p>';
+}
+drawPoojas();
+
+// ---------- Special days ----------
+$('#days').innerHTML = SPECIAL_DAYS.filter(d => d.date >= today).slice(0, 8).map(d => {
+  const dt = new Date(d.date + 'T00:00:00'), p = POOJAS.find(x => x.id === d.pooja);
+  return `<div class="snap-start shrink-0 w-64 rounded-[1.6rem] bg-white border border-sandal p-5 hover:shadow-soft transition flex flex-col">
+    <div class="flex items-center gap-4"><div class="w-16 h-[4.5rem] rounded-t-full rounded-b-xl bg-temple-700 text-center pt-3"><b class="block font-display text-3xl leading-none text-gold-200">${dt.getDate()}</b><span class="text-[10px] font-bold uppercase tracking-wider text-gold-300">${dt.toLocaleDateString('en', { month: 'short' })}</span></div>
+      <div><b class="font-display text-2xl text-temple-900 leading-tight">${d.type}</b><p class="font-tamil text-sm text-gold-700">${d.ta}</p><p class="text-xs text-stone-500">${dt.toLocaleDateString('en-IN', { weekday: 'long' })}</p></div></div>
+    <p class="text-sm text-stone-600 mt-4 flex-1">${esc(p.name)}</p>
+    <a href="pooja.html?id=${d.pooja}&date=${d.date}" class="btn btn-outline text-sm !py-2 mt-4">Book for this day</a></div>`;
+}).join('');
+
+// ---------- Donations ----------
+// Donation causes: one featured (Annadhanam) + compact list. Images are absolutely positioned so every photo crops to the same frame.
+const DON_ICON = { annadhanam: 'leaf', bricks: 'temple', goshala: 'sun', education: 'scroll' };
+const pct = d => Math.round(d.raised / d.goal * 100);
+const progress = (d, dark) => `<div class="h-2 rounded-full ${dark ? 'bg-white/15' : 'bg-sandal'} overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-gold-300 to-gold-500" style="width:${Math.max(pct(d), 3)}%"></div></div>
+  <div class="flex justify-between text-xs mt-2 ${dark ? 'text-stone-300' : 'text-stone-500'}"><span><b class="${dark ? 'text-gold-200' : 'text-temple-800'} text-sm">${rupee(d.raised)}</b> raised</span><span>${pct(d)}% of ${rupee(d.goal)}</span></div>`;
+const [feat, ...rest] = DONATIONS;
+$('#donations').innerHTML = `
+  <article class="lg:col-span-2 relative rounded-[2rem] overflow-hidden min-h-[30rem] text-white flex reveal">
+    ${imgTag(feat.img, 'absolute inset-0 w-full h-full object-cover', feat.name)}
+    <div class="absolute inset-0 bg-gradient-to-t from-night-950 via-night-950/75 to-night-950/10"></div>
+    <div class="relative mt-auto p-7 md:p-8 w-full">
+      <span class="chip bg-gold-400 text-night-950">${ic('sparkle', 'w-3.5 h-3.5')} Most needed</span>
+      <h3 class="font-display text-4xl font-semibold mt-4 leading-tight">${esc(feat.name)}</h3><p class="font-tamil text-lg text-gold-200">${feat.ta}</p>
+      <p class="text-stone-300 mt-2">${esc(feat.desc)} ₹501 feeds 10 devotees.</p>
+      <div class="mt-6">${progress(feat, true)}</div>
+      <div class="grid grid-cols-3 gap-2 mt-6">${[501, 1001, 2501].map(a => `<a href="donate.html?cause=${feat.id}&amount=${a}" class="rounded-xl border border-white/25 py-2.5 text-center font-bold hover:bg-white/10 hover:border-gold-300 transition">${rupee(a)}</a>`).join('')}</div>
+      <a href="donate.html?cause=${feat.id}" class="btn btn-gold w-full mt-3 !py-3">Donate to Annadhanam ${ic('arrow', 'w-4 h-4')}</a>
+    </div>
+  </article>
+  <div class="lg:col-span-3 grid gap-5">
+    ${rest.map((d, i) => `<article class="reveal group grid grid-cols-[7.5rem_1fr] sm:grid-cols-[11rem_1fr] rounded-[1.6rem] bg-white border border-sandal overflow-hidden hover:shadow-soft transition" style="transition-delay:${(i + 1) * 90}ms">
+      <div class="relative overflow-hidden">${imgTag(d.img, 'absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-700', d.name)}</div>
+      <div class="p-5 sm:p-6 flex flex-col">
+        <div class="flex items-start justify-between gap-3">
+          <div><b class="font-display text-2xl text-temple-900 leading-tight block">${esc(d.name)}</b><span class="font-tamil text-sm text-gold-700">${d.ta}</span></div>
+          <span class="hidden sm:grid w-10 h-10 shrink-0 rounded-xl bg-temple-50 text-temple-700 place-items-center">${ic(DON_ICON[d.id] || 'heart', 'w-5 h-5')}</span>
+        </div>
+        <p class="text-sm text-stone-600 mt-1.5 line-clamp-2">${esc(d.desc)}</p>
+        <div class="mt-4">${progress(d)}</div>
+        <div class="flex items-center gap-2 mt-4">
+          <a href="donate.html?cause=${d.id}" class="btn btn-green text-sm !py-2 !px-5">Donate</a>
+          <a href="donate.html?cause=${d.id}&amount=1001" class="text-sm font-semibold text-temple-700 hover:underline">Give ₹1,001</a>
+        </div>
+      </div></article>`).join('')}
+  </div>`;
+
+// ---------- Products ----------
+$('#products').innerHTML = PRODUCTS.slice(0, 4).map((p, i) => `<a href="product.html?id=${p.id}" class="group reveal" style="transition-delay:${i * 80}ms">
+  <div class="relative rounded-[1.6rem] overflow-hidden aspect-square bg-sandal">${imgTag(p.img, 'w-full h-full object-cover group-hover:scale-105 transition duration-700', p.name)}
+    <span class="absolute top-3 left-3 chip bg-temple-700 text-white">-${Math.round((1 - p.price / p.mrp) * 100)}%</span>
+    <span class="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-ivory text-temple-800 grid place-items-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition">${ic('cart', 'w-4 h-4')}</span></div>
+  <p class="text-[11px] uppercase tracking-[.18em] text-gold-700 font-bold mt-4">${p.cat}</p>
+  <b class="font-display text-xl text-temple-900 leading-tight block mt-1">${esc(L(p, 'name', 'ta'))}</b>
+  <p class="mt-1 font-bold text-temple-800">${rupee(p.price)} <s class="text-xs text-stone-400 font-normal">${rupee(p.mrp)}</s></p></a>`).join('');
+
+$('#reviews').innerHTML = REVIEWS.slice(0, 3).map(r => `<div class="reveal">${reviewCard(r)}</div>`).join('');
+
+$('#remind').onclick = async () => {
+  if (!('Notification' in window)) return toast('Notifications are not supported on this browser');
+  const p = await Notification.requestPermission();
+  toast(p === 'granted' ? '🔔 You will be notified before every live stream' : 'Notifications are blocked in browser settings');
+};
+
+// ---------- Scroll reveal ----------
+const io = 'IntersectionObserver' in window ? new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: .12 }) : null;
+$$('.reveal').forEach(el => io ? io.observe(el) : el.classList.add('in'));
+</script>
+</body>
+</html>

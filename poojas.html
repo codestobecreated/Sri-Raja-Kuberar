@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>All E-Poojas – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main>
+  <div id="hero"></div>
+  <section class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2" id="cats"></div>
+    <div class="grid lg:grid-cols-4 gap-8 mt-6">
+      <aside class="card p-5 h-fit lg:sticky lg:top-24 space-y-4">
+        <div><label class="label">Search</label><input id="f-q" class="field" placeholder="Pooja name…"></div>
+        <div><label class="label">Temple</label><select id="f-temple" class="field"><option value="">All temples</option></select></div>
+        <div><label class="label">Deity</label><select id="f-deity" class="field"><option value="">All deities</option></select></div>
+        <div><label class="label">Date from</label><input id="f-date" type="date" class="field"></div>
+        <div><label class="label">Max price: <span id="price-v"></span></label><input id="f-price" type="range" min="200" max="3500" step="100" value="3500" class="w-full accent-temple-600"></div>
+        <div><label class="label">Sort by</label><select id="f-sort" class="field"><option value="date">Date (soonest)</option><option value="price">Price (low to high)</option><option value="popular">Most booked</option><option value="rating">Top rated</option></select></div>
+        <button id="reset" class="btn btn-outline w-full text-sm">Reset filters</button>
+      </aside>
+      <div class="lg:col-span-3"><p id="count" class="text-sm text-gray-600 mb-4"></p><div id="list" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-6"></div></div>
+    </div>
+  </section>
+</main>
+<div id="site-footer"></div>
+<script>
+const CATS = [['', 'All'], ['pooja', 'Pooja & Homam'], ['aarti', 'Aarti'], ['darshan', 'Special Darshan'], ['virtual', 'Virtual Seva']];
+let cat = qs('cat') || '';
+$('#hero').innerHTML = pageHero(t('poojas'), 'Authentic Vedic poojas performed in your name and gothram, with video proof on WhatsApp and prasadam delivery.', [[t('poojas')]]);
+TEMPLES.forEach(tp => $('#f-temple').insertAdjacentHTML('beforeend', `<option value="${tp.id}">${esc(L(tp))}</option>`));
+[...new Set(POOJAS.map(p => p.deity))].forEach(d => $('#f-deity').insertAdjacentHTML('beforeend', `<option>${d}</option>`));
+if (qs('temple')) $('#f-temple').value = qs('temple');
+function draw() {
+  $('#cats').innerHTML = CATS.map(c => `<button data-c="${c[0]}" class="chip !text-sm !px-4 !py-2 border border-temple-200 bg-white shrink-0 ${c[0] === cat ? 'tab-active' : ''}">${c[1]}</button>`).join('');
+  $$('[data-c]').forEach(b => b.onclick = () => { cat = b.dataset.c; draw(); });
+  const q = $('#f-q').value.toLowerCase(), tp = $('#f-temple').value, d = $('#f-deity').value, dt = $('#f-date').value, mx = +$('#f-price').value, so = $('#f-sort').value;
+  $('#price-v').textContent = rupee(mx);
+  const min = p => Math.min(...p.pkgs.map(k => k.price));
+  let r = POOJAS.filter(p => (!cat || p.category === cat) && (!tp || p.temple === tp) && (!d || p.deity === d) && (!dt || p.date >= dt) && min(p) <= mx && (p.name + p.name_ta).toLowerCase().includes(q));
+  r.sort({ date: (a, b) => a.date.localeCompare(b.date), price: (a, b) => min(a) - min(b), popular: (a, b) => b.booked - a.booked, rating: (a, b) => b.rating - a.rating }[so]);
+  $('#count').textContent = `${r.length} pooja${r.length === 1 ? '' : 's'} found`;
+  $('#list').innerHTML = r.length ? r.map(poojaCard).join('') : `<div class="col-span-full card p-10 text-center"><div class="text-5xl">🙏</div><p class="mt-3 text-gray-600">No poojas match these filters.</p></div>`;
+}
+$$('aside input, aside select').forEach(el => el.oninput = draw);
+$('#reset').onclick = () => { $$('aside input, aside select').forEach(el => el.type === 'range' ? el.value = 3500 : el.value = ''); $('#f-sort').value = 'date'; cat = ''; draw(); };
+draw();
+</script>
+</body>
+</html>

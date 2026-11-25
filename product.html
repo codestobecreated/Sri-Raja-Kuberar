@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Product – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main id="page" class="max-w-7xl mx-auto px-4 py-10"></main>
+<div id="site-footer"></div>
+<script>
+const p = PRODUCTS.find(x => x.id === qs('id')) || PRODUCTS[0];
+document.title = p.name + ' – Divine Collections';
+const pics = [p.img, ...IMG.gallery.slice(0, 3)];
+$('#page').innerHTML = `<nav class="text-sm text-gray-500 mb-6"><a href="index.html">${t('home')}</a> / <a href="shop.html">${t('shop')}</a> / <span class="text-temple-800">${esc(p.name)}</span></nav>
+<div class="grid lg:grid-cols-2 gap-10">
+  <div><div class="card overflow-hidden aspect-square">${imgTag(p.img, 'w-full h-full object-cover', p.name).replace('<img', '<img id="main"')}</div>
+    <div class="grid grid-cols-4 gap-3 mt-3">${pics.map(s => `<button class="card overflow-hidden aspect-square" data-pic="${s}">${imgTag(s, 'w-full h-full object-cover')}</button>`).join('')}</div></div>
+  <div><p class="text-xs text-gold-700 font-bold uppercase tracking-widest">${p.cat}</p><h1 class="font-display text-4xl text-temple-900 mt-1">${esc(p.name)}</h1><p class="text-gray-500">${esc(p.ta)}</p>
+    <p class="mt-4 text-3xl font-extrabold text-temple-700">${rupee(p.price)} <s class="text-lg text-gray-400 font-medium">${rupee(p.mrp)}</s> <span class="chip bg-green-100 text-green-700 align-middle">${Math.round((1 - p.price / p.mrp) * 100)}% OFF</span></p>
+    <p class="text-sm mt-1 ${p.stock ? 'text-green-700' : 'text-red-600'} font-semibold">${p.stock ? `In stock (${p.stock} left)` : 'Out of stock'}</p>
+    <p class="mt-5 text-gray-700 leading-relaxed">${esc(p.desc)}</p>
+    <ul class="mt-4 text-sm space-y-1 text-gray-700"><li>🙏 Energised during pooja at the peedam</li><li>🚚 Ships in 2–3 days with tracking</li><li>🌍 International shipping available</li></ul>
+    <div class="flex items-center gap-3 mt-6"><div class="flex items-center border rounded-xl"><button class="w-10 h-11" id="minus">−</button><input id="qty" value="1" class="w-12 text-center font-bold" aria-label="Quantity"><button class="w-10 h-11" id="plus">+</button></div>
+      <button id="add" class="btn btn-gold flex-1" ${p.stock ? '' : 'disabled'}>🛒 Add to cart</button><button id="w" class="btn btn-outline">${wish.has(p.id) ? '❤️' : '🤍'}</button></div>
+    <button id="buy" class="btn btn-green w-full mt-3" ${p.stock ? '' : 'disabled'}>Buy now</button>
+  </div>
+</div>
+<h2 class="font-display text-3xl text-temple-900 mt-16 mb-6">More divine items</h2>
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-5">${PRODUCTS.filter(x => x.id !== p.id).slice(0, 4).map(x => `<a href="product.html?id=${x.id}" class="card overflow-hidden">${imgTag(x.img, 'w-full aspect-square object-cover')}<div class="p-3"><b class="text-sm text-temple-900">${esc(x.name)}</b><p class="font-bold text-temple-700">${rupee(x.price)}</p></div></a>`).join('')}</div>`;
+$$('[data-pic]').forEach(b => b.onclick = () => $('#main').src = b.dataset.pic);
+const q = () => Math.max(1, +$('#qty').value || 1);
+$('#minus').onclick = () => $('#qty').value = Math.max(1, q() - 1); $('#plus').onclick = () => $('#qty').value = Math.min(p.stock, q() + 1);
+$('#add').onclick = () => cart.add(p.id, q());
+$('#buy').onclick = () => { cart.add(p.id, q()); location.href = 'cart.html'; };
+$('#w').onclick = e => e.currentTarget.textContent = wish.toggle(p.id) ? '❤️' : '🤍';
+</script>
+</body>
+</html>

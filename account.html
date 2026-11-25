@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My Account – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main class="max-w-7xl mx-auto px-4 py-8 grid lg:grid-cols-4 gap-6">
+  <aside class="card p-4 h-fit lg:sticky lg:top-24"><div id="me" class="p-2 pb-4 border-b mb-2"></div><nav id="tabs" class="flex lg:flex-col gap-1 overflow-x-auto no-scrollbar"></nav></aside>
+  <section id="panel" class="lg:col-span-3 min-w-0"></section>
+</main>
+<div id="site-footer"></div>
+<script>
+requireLogin();
+const U = user() || {};
+const TABS = [['dashboard', '🏠 Dashboard'], ['bookings', '🪔 My Bookings'], ['family', '👨‍👩‍👧 Family Profiles'], ['orders', '📦 My Orders'], ['subs', '🔁 Subscriptions & Donations'], ['referral', '🎁 Referral & Rewards'], ['addresses', '📍 Saved Addresses'], ['wishlist', '❤️ Wishlist']];
+$('#me').innerHTML = `<div class="flex items-center gap-3"><div class="w-12 h-12 rounded-full bg-gold-400 grid place-items-center font-bold text-temple-900 text-lg">${esc((U.name || 'D')[0])}</div><div><b class="text-temple-900">${esc(U.name)}</b><p class="text-xs text-gray-500">${esc(U.mobile)}</p>${U.membership ? `<span class="chip bg-gold-100 text-gold-700 mt-1">⭐ ${esc(U.membership.plan)}</span>` : ''}</div></div>
+  <button id="logout" class="text-xs text-red-600 mt-3">Log out</button>`;
+$('#logout').onclick = () => { store.set('user', null); location.href = 'index.html'; };
+const H = (title, extra = '') => `<div class="flex flex-wrap items-center justify-between gap-3 mb-5"><h1 class="font-display text-3xl text-temple-900">${title}</h1>${extra}</div>`;
+const empty = (msg, link, label) => `<div class="card p-10 text-center text-gray-600"><p>${msg}</p>${link ? `<a href="${link}" class="btn btn-gold mt-4">${label}</a>` : ''}</div>`;
+const STAGES = ['Booked', 'Sankalpam received', 'Pooja in progress', 'Video sent', 'Prasadam dispatched', 'Delivered'];
+const VIEWS = {
+  dashboard() { const b = store.get('bookings', []), o = store.get('orders', []), s = store.get('subs', []), d = store.get('donations', []);
+    const stat = (n, l, href) => `<a href="#${href}" class="card p-5 hover:shadow-soft"><b class="text-3xl text-temple-700">${n}</b><p class="text-sm text-gray-600">${l}</p></a>`;
+    const next = b.filter(x => x.date >= new Date().toISOString().slice(0, 10)).sort((x, y) => x.date.localeCompare(y.date))[0];
+    return H('Vanakkam, ' + esc(U.name) + ' 🙏') + `<div class="grid grid-cols-2 md:grid-cols-4 gap-4">${stat(b.length, 'Bookings', 'bookings')}${stat(o.length, 'Orders', 'orders')}${stat(s.filter(x => x.active).length, 'Active subscriptions', 'subs')}${stat(d.length, 'Donations', 'subs')}</div>
+      ${next ? `<div class="card p-6 mt-6 kolam-bg text-white"><p class="text-gold-200 text-sm">Next pooja</p><h2 class="font-display text-2xl">${esc(next.name)}</h2><p class="text-sm">${fmtDate(next.date)} · ${next.time} · ID ${next.id}</p><div class="flex gap-2 mt-4"><a href="track.html?id=${next.id}" class="btn btn-gold text-sm !py-2">Track</a><a href="live.html" class="btn border border-white/40 text-sm !py-2">Live link</a></div></div>` : ''}
+      <div class="grid md:grid-cols-2 gap-4 mt-6"><a href="poojas.html" class="card p-5 hover:shadow-soft"><b>🪔 Book a new pooja</b><p class="text-sm text-gray-600">Your family profiles fill in automatically.</p></a><a href="#referral" class="card p-5 hover:shadow-soft"><b>🎁 Invite friends</b><p class="text-sm text-gray-600">You both get 10% off.</p></a></div>`; },
+  bookings() { const b = store.get('bookings', []); if (!b.length) return H('My Bookings') + empty('No bookings yet.', 'poojas.html', 'Book a pooja');
+    return H('My Bookings') + `<div class="space-y-4">${b.map(x => `<div class="card p-5"><div class="flex flex-wrap justify-between gap-3"><div><b class="text-temple-900">${esc(x.name)}</b><p class="text-xs text-gray-500">${x.id} · ${fmtDate(x.date)} · ${x.pkg} · ${x.members.length} devotee(s)</p></div><span class="chip bg-gold-100 text-gold-700 h-fit">${STAGES[x.status || 0]}</span></div>
+      <div class="flex gap-1 mt-3">${STAGES.map((_, i) => `<span class="h-1.5 flex-1 rounded-full ${i <= (x.status || 0) ? 'bg-green-500' : 'bg-gray-200'}"></span>`).join('')}</div>
+      <div class="flex flex-wrap gap-2 mt-4"><a href="track.html?id=${x.id}" class="btn btn-outline text-xs !py-1.5">Track</a><a href="receipt.html?id=${x.id}" target="_blank" class="btn btn-outline text-xs !py-1.5">Receipt</a><a href="receipt.html?id=${x.id}&type=cert" target="_blank" class="btn btn-outline text-xs !py-1.5">Certificate</a>${(x.status || 0) >= 3 ? `<a href="https://wa.me/${SITE.phoneRaw}?text=${encodeURIComponent('Please resend video for ' + x.id)}" target="_blank" class="btn btn-outline text-xs !py-1.5">▶ Video</a>` : ''}<a href="pooja.html?id=${x.pooja}" class="btn btn-green text-xs !py-1.5">Book again</a></div></div>`).join('')}</div>`; },
+  family() { const f = store.get('family', []);
+    return H('Family Profiles', '<button id="add-fam" class="btn btn-gold text-sm !py-2">+ Add member</button>') + `<p class="text-sm text-gray-600 -mt-3 mb-4">Saved once, filled automatically in every booking.</p>
+      ${f.length ? `<div class="grid md:grid-cols-2 gap-4">${f.map((m, i) => `<div class="card p-5 flex justify-between"><div><b class="text-temple-900">${esc(m.name)}</b><p class="text-sm text-gray-600">${m.nak} · ${m.rasi}</p><p class="text-xs text-gray-500">${esc(m.goth)}</p></div><button data-del="${i}" class="text-gray-400 hover:text-red-600 h-fit" aria-label="Remove">✕</button></div>`).join('')}</div>` : empty('No family members saved yet.')}`; },
+  orders() { const o = store.get('orders', []); if (!o.length) return H('My Orders') + empty('No orders yet.', 'shop.html', 'Divine Collections');
+    return H('My Orders') + `<div class="space-y-4">${o.map(x => `<div class="card p-5"><div class="flex justify-between flex-wrap gap-2"><div><b>${x.id}</b><p class="text-xs text-gray-500">${new Date(x.created).toLocaleDateString('en-IN')} · ${x.items.length} item(s)</p></div><b class="text-temple-700">${rupee(x.amount)}</b></div><p class="text-sm mt-2 text-gray-700">${x.items.map(i => esc(i.name) + ' × ' + i.qty).join(', ')}</p>
+      <div class="flex flex-wrap items-center gap-2 mt-3"><span class="chip bg-gold-100 text-gold-700">${esc(x.status)}</span>${x.tracking ? `<span class="chip bg-temple-50 text-temple-700">🚚 ${esc(x.tracking)}</span>` : ''}<a href="receipt.html?id=${x.id}&type=order" target="_blank" class="btn btn-outline text-xs !py-1.5 ml-auto">Invoice</a></div></div>`).join('')}</div>`; },
+  subs() { const s = store.get('subs', []), d = store.get('donations', []);
+    return H('Subscriptions & Donations') + `<h2 class="font-bold text-temple-900 mb-3">Active plans</h2>${s.length ? `<div class="grid md:grid-cols-2 gap-4">${s.map((x, i) => `<div class="card p-5"><div class="flex justify-between"><b>${esc(x.plan)}</b><span class="chip ${x.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">${x.active ? 'Active' : 'Paused'}</span></div><p class="text-sm text-gray-600 mt-1">${esc(x.name)} · ${x.nak} · ${rupee(x.price)}/month</p><button data-toggle="${i}" class="btn btn-outline text-xs !py-1.5 mt-3">${x.active ? 'Pause' : 'Resume'}</button></div>`).join('')}</div>` : empty('No subscriptions.', 'subscriptions.html', 'See plans')}
+      <h2 class="font-bold text-temple-900 mb-3 mt-8">Donation receipts</h2>${d.length ? `<div class="card divide-y">${d.map(x => `<div class="p-4 flex justify-between items-center gap-3 text-sm"><div><b>${esc(x.cause)}</b><p class="text-xs text-gray-500">${x.id} · ${new Date(x.created).toLocaleDateString('en-IN')}</p></div><b>${rupee(x.amount)}</b><a href="receipt.html?id=${x.id}&type=donation" target="_blank" class="btn btn-outline text-xs !py-1.5">Receipt</a></div>`).join('')}</div>` : empty('No donations yet.', 'donate.html', 'Donate')}`; },
+  referral() { const code = U.refCode || store.get('refCode') || 'RKREF0000', link = location.origin + location.pathname.replace('account.html', '') + 'poojas.html?ref=' + code, used = store.get('refUsed', 2);
+    return H('Referral & Rewards') + `<div class="card p-6 kolam-bg text-white"><p class="text-gold-200">Your referral code</p><b class="text-4xl tracking-widest font-display">${code}</b><p class="text-sm mt-2">Your friend gets 10% off their first pooja – and you get 10% off your next one.</p>
+      <div class="flex flex-wrap gap-2 mt-4"><button id="copy" class="btn btn-gold text-sm !py-2">Copy link</button><a target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent('Book authentic poojas at Sri Raja Kuberar Peedam with video proof. Use my code ' + code + ' for 10% off: ' + link)}" class="btn bg-[#25D366] text-white text-sm !py-2">Share on WhatsApp</a></div></div>
+      <div class="grid grid-cols-3 gap-4 mt-6"><div class="card p-5 text-center"><b class="text-3xl text-temple-700">${used}</b><p class="text-sm text-gray-600">Friends joined</p></div><div class="card p-5 text-center"><b class="text-3xl text-temple-700">${used}</b><p class="text-sm text-gray-600">Coupons earned</p></div><div class="card p-5 text-center"><b class="text-3xl text-temple-700">${rupee(used * 150)}</b><p class="text-sm text-gray-600">Saved</p></div></div>`; },
+  addresses() { const a = store.get('addresses', []);
+    return H('Saved Addresses', '<button id="add-addr" class="btn btn-gold text-sm !py-2">+ Add address</button>') + (a.length ? `<div class="grid md:grid-cols-2 gap-4">${a.map((x, i) => `<div class="card p-5 flex justify-between"><div><span class="chip bg-temple-50 text-temple-700">${esc(x.label)}</span><p class="text-sm mt-2">${esc(x.line)}<br>${esc(x.city)} – ${esc(x.pin)}</p></div><button data-deladdr="${i}" class="text-gray-400 hover:text-red-600 h-fit">✕</button></div>`).join('')}</div>` : empty('No saved addresses.')); },
+  wishlist() { const w = wish.all(), ps = POOJAS.filter(p => w.includes(p.id)), pr = PRODUCTS.filter(p => w.includes(p.id));
+    return H('Wishlist') + (ps.length || pr.length ? `<p class="text-sm text-gray-600 -mt-3 mb-4">🔔 We'll remind you on WhatsApp before each pooja's booking cutoff.</p><div class="grid sm:grid-cols-2 xl:grid-cols-3 gap-5">${ps.map(poojaCard).join('')}${pr.map(p => `<a href="product.html?id=${p.id}" class="card overflow-hidden">${imgTag(p.img, 'w-full aspect-square object-cover')}<div class="p-4"><b>${esc(p.name)}</b><p class="font-bold text-temple-700">${rupee(p.price)}</p></div></a>`).join('')}</div>` : empty('Nothing saved yet. Tap 🤍 on any pooja or product.', 'poojas.html', 'Browse poojas')); }
+};
+function show() {
+  const k = (location.hash || '#dashboard').slice(1); const tab = VIEWS[k] ? k : 'dashboard';
+  $('#tabs').innerHTML = TABS.map(([id, l]) => `<a href="#${id}" class="shrink-0 px-3 py-2 rounded-xl text-sm font-semibold ${id === tab ? 'tab-active' : 'hover:bg-temple-50'}">${l}</a>`).join('');
+  $('#panel').innerHTML = `<div class="fade-up">${VIEWS[tab]()}</div>`; bind();
+}
+function bind() {
+  if ($('#add-fam')) $('#add-fam').onclick = () => { const m = modal(`<form class="p-7 space-y-3"><h3 class="font-display text-2xl text-temple-900">Add family member</h3><input name="name" class="field" placeholder="Full name" required>
+    <select name="nak" class="field" required><option value="">நட்சத்திரம்</option>${NAKSHATRAS.map(n => `<option>${n}</option>`).join('')}</select><select name="rasi" class="field" required><option value="">ராசி</option>${RASIS.map(n => `<option>${n}</option>`).join('')}</select>
+    <select name="goth" class="field">${GOTHRAMS.map(n => `<option>${n}</option>`).join('')}</select><button class="btn btn-gold w-full">Save</button></form>`);
+    $('form', m).onsubmit = e => { e.preventDefault(); const f = Object.fromEntries(new FormData(e.target)); store.set('family', [...store.get('family', []), f]); m.remove(); show(); }; };
+  $$('[data-del]').forEach(b => b.onclick = () => { const f = store.get('family', []); f.splice(b.dataset.del, 1); store.set('family', f); show(); });
+  $$('[data-toggle]').forEach(b => b.onclick = () => { const s = store.get('subs', []); s[b.dataset.toggle].active = !s[b.dataset.toggle].active; store.set('subs', s); show(); });
+  if ($('#copy')) $('#copy').onclick = () => { navigator.clipboard?.writeText(location.origin + '/poojas.html?ref=' + (U.refCode || '')); toast('Link copied'); };
+  if ($('#add-addr')) $('#add-addr').onclick = () => { const m = modal(`<form class="p-7 space-y-3"><h3 class="font-display text-2xl text-temple-900">Add address</h3><select name="label" class="field"><option>Home</option><option>Office</option><option>Parents</option></select><textarea name="line" class="field" rows="2" placeholder="Address" required></textarea><div class="grid grid-cols-2 gap-3"><input name="city" class="field" placeholder="City" required><input name="pin" class="field" placeholder="PIN" required></div><button class="btn btn-gold w-full">Save</button></form>`);
+    $('form', m).onsubmit = e => { e.preventDefault(); store.set('addresses', [...store.get('addresses', []), Object.fromEntries(new FormData(e.target))]); m.remove(); show(); }; };
+  $$('[data-deladdr]').forEach(b => b.onclick = () => { const a = store.get('addresses', []); a.splice(b.dataset.deladdr, 1); store.set('addresses', a); show(); });
+}
+window.onhashchange = show; show();
+</script>
+</body>
+</html>

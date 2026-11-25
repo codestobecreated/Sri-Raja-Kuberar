@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Today's Panchangam – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main><div id="hero"></div>
+  <section class="max-w-5xl mx-auto px-4 py-10">
+    <div class="flex items-center justify-center gap-3"><button id="prev" class="btn btn-outline !px-3 !py-2" aria-label="Previous day">◀</button><input type="date" id="d" class="field max-w-[12rem] text-center font-semibold"><button id="next" class="btn btn-outline !px-3 !py-2" aria-label="Next day">▶</button></div>
+    <div id="out" class="mt-8"></div>
+    <p class="text-xs text-gray-500 text-center mt-6">Times are for Chennai. Thithi and nakshatra are approximate – connect a panchangam API in production for exact end-times.</p>
+  </section></main>
+<div id="site-footer"></div>
+<script>
+$('#hero').innerHTML = pageHero(t('todayPanchang'), 'Thithi, nakshatra, Rahu Kalam, Yamagandam and auspicious time – updated daily.', [[t('panchangam')]]);
+let cur = new Date(); const iso = d => d.toISOString().slice(0, 10);
+function draw() {
+  $('#d').value = iso(cur); const p = panchang(cur), sp = SPECIAL_DAYS.find(s => s.date === iso(cur));
+  const box = (k, ta, v, c) => `<div class="card p-5 ${c || ''}"><p class="text-xs uppercase tracking-wider text-gray-500">${k} · ${ta}</p><b class="text-xl text-temple-900 block mt-1">${v}</b></div>`;
+  $('#out').innerHTML = `<div class="kolam-bg text-white rounded-3xl p-6 md:p-8 text-center"><p class="text-gold-200">${p.day_ta} · ${cur.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</p>
+    <h2 class="font-display text-4xl md:text-5xl mt-2">${p.thithi_ta} · ${p.thithi}</h2><p class="mt-2">${p.paksha} Paksha · Nakshatra: <b>${p.nakshatra_ta} (${p.nakshatra})</b></p>
+    ${sp ? `<div class="mt-5 inline-flex flex-wrap items-center gap-3 bg-gold-400 text-temple-900 rounded-2xl px-5 py-3"><b>✨ Today is ${sp.type} · ${sp.ta}</b><a href="pooja.html?id=${sp.pooja}&date=${sp.date}" class="btn bg-temple-800 text-white !py-1.5 text-sm">Book a pooja for this day</a></div>` : ''}</div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+      ${box('Sunrise', 'சூரிய உதயம்', '🌅 ' + p.sunrise)}${box('Sunset', 'சூரிய அஸ்தமனம்', '🌇 ' + p.sunset)}${box('Nalla Neram', 'நல்ல நேரம்', '✨ ' + p.nalla, 'bg-green-50')}
+      ${box('Rahu Kalam', 'ராகு காலம்', '⛔ ' + p.rahu, 'bg-red-50')}${box('Yamagandam', 'எமகண்டம்', '⛔ ' + p.yama, 'bg-red-50')}${box('Kuligai', 'குளிகை', '⚠ ' + p.guli, 'bg-orange-50')}
+    </div>
+    <div class="card p-6 mt-6 flex flex-wrap items-center justify-between gap-4"><div><b class="text-temple-900">🔔 Nakshatra reminders</b><p class="text-sm text-gray-600">Get a WhatsApp reminder before your birth nakshatra day to book an archana.</p></div><a href="remedies.html" class="btn btn-gold text-sm">Set my nakshatra</a></div>`;
+}
+$('#d').onchange = e => { cur = new Date(e.target.value + 'T06:00:00'); draw(); };
+$('#prev').onclick = () => { cur.setDate(cur.getDate() - 1); draw(); }; $('#next').onclick = () => { cur.setDate(cur.getDate() + 1); draw(); };
+draw();
+</script>
+</body>
+</html>

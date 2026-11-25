@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Special Days Calendar – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main><div id="hero"></div>
+  <section class="max-w-6xl mx-auto px-4 py-10">
+    <div class="flex items-center justify-between mb-4"><button id="prev" class="btn btn-outline !py-2">◀</button><h2 id="month" class="font-display text-3xl text-temple-900"></h2><button id="next" class="btn btn-outline !py-2">▶</button></div>
+    <div class="flex flex-wrap gap-2 mb-4 text-xs" id="legend"></div>
+    <div class="grid grid-cols-7 gap-1 text-center text-xs font-bold text-gray-500 mb-1"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div>
+    <div id="grid" class="grid grid-cols-7 gap-1"></div>
+    <h3 class="font-display text-2xl text-temple-900 mt-10 mb-4">This month's special days</h3><div id="list" class="grid md:grid-cols-2 gap-3"></div>
+  </section></main>
+<div id="site-footer"></div>
+<script>
+$('#hero').innerHTML = pageHero('Special Days Calendar', 'Pradosham, Sashti, Ekadasi, Kiruthigai, Pournami and Amavasai – book a pooja for any special day.', [[t('panchangam')], ['Calendar']]);
+const COLORS = { Pradosham: 'bg-blue-100 text-blue-800', Sashti: 'bg-orange-100 text-orange-800', Ekadasi: 'bg-purple-100 text-purple-800', Kiruthigai: 'bg-red-100 text-red-800', Pournami: 'bg-yellow-100 text-yellow-800', Amavasai: 'bg-gray-200 text-gray-800' };
+$('#legend').innerHTML = Object.entries(COLORS).map(([k, c]) => `<span class="chip ${c}">${k}</span>`).join('');
+// Combine fixed festival list with computed Pournami/Amavasai/Ekadasi/Sashti/Pradosham from the panchang calc
+function daysOf(y, m) { const out = {}; const n = new Date(y, m + 1, 0).getDate();
+  for (let d = 1; d <= n; d++) { const dt = new Date(y, m, d), iso = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`; const p = panchang(dt);
+    const fixed = SPECIAL_DAYS.find(s => s.date === iso); let type = fixed?.type;
+    if (!type) type = ({ Pournami: 'Pournami', Amavasai: 'Amavasai', Ekadasi: 'Ekadasi', Sashti: 'Sashti', Thrayodasi: 'Pradosham' })[p.thithi];
+    if (type && !Object.values(out).some(o => o.type === type && Math.abs(o.d - d) < 3)) out[d] = { d, iso, type, pooja: fixed?.pooja || { Pradosham: 'pradosham-abhishekam', Pournami: 'kubera-lakshmi', Amavasai: 'annadhanam-archana', Sashti: 'navagraha-shanti', Ekadasi: 'kanakadhara-homam' }[type] || 'kubera-lakshmi' }; }
+  return out; }
+let y = new Date().getFullYear(), m = new Date().getMonth();
+function draw() {
+  $('#month').textContent = new Date(y, m, 1).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+  const sp = daysOf(y, m), first = new Date(y, m, 1).getDay(), n = new Date(y, m + 1, 0).getDate(), today = new Date();
+  let html = '<div></div>'.repeat(first);
+  for (let d = 1; d <= n; d++) { const s = sp[d], isT = today.getDate() === d && today.getMonth() === m && today.getFullYear() === y;
+    html += `<div class="min-h-20 md:min-h-24 rounded-xl border ${isT ? 'border-gold-400 bg-gold-50' : 'border-gray-100 bg-white'} p-1.5 text-left flex flex-col"><b class="text-sm ${isT ? 'text-gold-700' : 'text-gray-700'}">${d}</b>
+      ${s ? `<span class="chip ${COLORS[s.type] || 'bg-temple-100 text-temple-800'} !text-[10px] !px-1.5 mt-1 leading-tight">${s.type}</span><a href="pooja.html?id=${s.pooja}&date=${s.iso}" class="mt-auto text-[10px] font-bold text-temple-700 hover:underline">Book →</a>` : ''}</div>`; }
+  $('#grid').innerHTML = html;
+  $('#list').innerHTML = Object.values(sp).map(s => `<div class="card p-4 flex items-center gap-3"><span class="chip ${COLORS[s.type] || 'bg-temple-100 text-temple-800'}">${s.type}</span><div class="flex-1 text-sm"><b>${fmtDate(s.iso, { weekday: 'long', day: 'numeric', month: 'short' })}</b><p class="text-xs text-gray-500">${esc(POOJAS.find(p => p.id === s.pooja).name)}</p></div><a href="pooja.html?id=${s.pooja}&date=${s.iso}" class="btn btn-gold text-xs !py-1.5 !px-3">Book a pooja for this day</a></div>`).join('') || '<p class="text-gray-500">No special days.</p>';
+}
+$('#prev').onclick = () => { m--; if (m < 0) { m = 11; y--; } draw(); }; $('#next').onclick = () => { m++; if (m > 11) { m = 0; y++; } draw(); };
+draw();
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Article – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main id="page"></main>
+<div id="site-footer"></div>
+<script>
+const a = ARTICLES.find(x => x.id === qs('id')) || ARTICLES[0];
+document.title = a.title + ' – Sri Raja Kuberar';
+document.head.insertAdjacentHTML('beforeend', `<meta name="description" content="${esc(a.excerpt)}"><script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'Article', headline: a.title, datePublished: a.date, image: a.img })}<\/script>`);
+const rel = POOJAS.find(p => a.title.toLowerCase().includes(p.deity.toLowerCase())) || POOJAS[1];
+$('#page').innerHTML = `<article class="max-w-3xl mx-auto px-4 py-10">
+  <nav class="text-sm text-gray-500"><a href="index.html">${t('home')}</a> / <a href="articles.html">Articles</a></nav>
+  <h1 class="font-display text-4xl md:text-5xl text-temple-900 mt-4 leading-tight">${esc(a.title)}</h1><p class="text-gray-500 mt-1">${esc(a.ta)}</p>
+  <p class="text-sm text-gray-500 mt-3">${fmtDate(a.date, { day: 'numeric', month: 'long', year: 'numeric' })} · ${a.read} min read</p>
+  ${imgTag(a.img, 'w-full rounded-3xl mt-6 aspect-[16/9] object-cover', a.title)}
+  <div class="mt-8 space-y-5 text-lg text-gray-800 leading-relaxed">
+    <p class="text-xl text-temple-800 font-medium">${esc(a.excerpt)}</p>
+    <p>Sri Raja Kubera Siddhar was an ardent devotee of Lord Shiva who never missed his girivalam. During one such girivalam he was blessed by a Siddhar, and from that day his life turned towards service – feeding the hungry, educating poor children and guiding devotees through their troubles.</p>
+    <h2 class="font-display text-2xl text-temple-900">The beginnings</h2>
+    <p>Swamigal first installed Raja Kuberar in a small apartment in Ashok Nagar, Chennai. Devotees who came for guidance found their problems eased, and word spread. With their support, land was found on the Chennai–Bengaluru National Highway at Vellagate, now known as Kuberapattinam, for a peedam worthy of the Lord of wealth.</p>
+    <blockquote class="border-l-4 border-gold-400 bg-gold-50 rounded-r-2xl px-5 py-4 font-display text-xl text-temple-900">“கொடுப்பதற்கு நான் இருக்கிறேன்! பெறுவதற்கு நீ வருகிறாயா?”<br><span class="text-base text-gray-600 font-sans">I am here to bestow – will you come forth to receive My grace?</span></blockquote>
+    <h2 class="font-display text-2xl text-temple-900">Annam Param Brahmam</h2>
+    <p>At the heart of the peedam is Annadhanam. Food is considered the Supreme Brahman itself, and serving it with love is the highest virtue. Every day, devotees who visit are fed, and sponsors can dedicate a day's annadhanam to a birthday, anniversary or the memory of a loved one.</p>
+  </div>
+  <div class="card p-6 mt-10 flex flex-wrap gap-4 items-center justify-between bg-temple-50"><div><p class="text-xs text-gold-700 font-bold uppercase">Related pooja</p><b class="text-lg text-temple-900">${esc(rel.name)}</b></div><a href="pooja.html?id=${rel.id}" class="btn btn-gold">Book now</a></div>
+  <div class="flex gap-2 mt-6"><a target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(a.title + ' ' + location.href)}" class="btn btn-outline text-sm !py-2">Share on WhatsApp</a></div>
+</article>
+<section class="max-w-7xl mx-auto px-4 pb-12"><h2 class="font-display text-2xl text-temple-900 mb-4">More articles</h2><div class="grid md:grid-cols-3 gap-6">${ARTICLES.filter(x => x.id !== a.id).map(x => `<a href="article.html?id=${x.id}" class="card overflow-hidden">${imgTag(x.img, 'w-full aspect-[16/10] object-cover')}<div class="p-4"><b class="text-temple-900">${esc(x.title)}</b></div></a>`).join('')}</div></section>`;
+</script>
+</body>
+</html>

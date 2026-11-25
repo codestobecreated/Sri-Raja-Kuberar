@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FAQ – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main><div id="hero"></div><section class="max-w-3xl mx-auto px-4 py-12"><input id="q" class="field mb-6" placeholder="Search questions…"><div id="list" class="space-y-3"></div>
+  <div class="card p-6 mt-10 text-center"><b class="text-temple-900">Still have a question?</b><div class="flex justify-center gap-3 mt-3"><a href="https://wa.me/${''}" id="wa" class="btn bg-[#25D366] text-white text-sm">WhatsApp us</a><a href="contact.html" class="btn btn-outline text-sm">Contact</a></div></div></section></main>
+<div id="site-footer"></div>
+<script>
+$('#hero').innerHTML = pageHero('Frequently Asked Questions', 'Booking, prasadam, payments and refunds.', [['FAQ']]);
+$('#wa').href = 'https://wa.me/' + SITE.phoneRaw;
+document.head.insertAdjacentHTML('beforeend', `<script type="application/ld+json">${JSON.stringify({ '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: FAQS.map(f => ({ '@type': 'Question', name: f[0], acceptedAnswer: { '@type': 'Answer', text: f[1] } })) })}<\/script>`);
+const draw = () => { const q = $('#q').value.toLowerCase(); $('#list').innerHTML = FAQS.filter(f => (f[0] + f[1]).toLowerCase().includes(q)).map(f => `<details class="card p-5 group"><summary class="font-semibold text-temple-900 cursor-pointer flex justify-between list-none">${esc(f[0])}<span class="text-gold-600 group-open:rotate-45 transition text-xl leading-none">+</span></summary><p class="text-gray-700 mt-3 text-sm leading-relaxed">${esc(f[1])}</p></details>`).join(''); };
+$('#q').oninput = draw; draw();
+</script>
+</body>
+</html>

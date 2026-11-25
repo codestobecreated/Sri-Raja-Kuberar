@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pooja Subscriptions – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main>
+  <div id="hero"></div>
+  <section class="max-w-7xl mx-auto px-4 py-12">
+    <div id="plans" class="grid sm:grid-cols-2 lg:grid-cols-5 gap-5"></div>
+    <div class="grid md:grid-cols-3 gap-6 mt-12 text-center">
+      <div class="card p-6"><div class="text-3xl">🔁</div><b class="block mt-2 text-temple-900">Automatic archana</b><p class="text-sm text-gray-600 mt-1">Performed on every special day without you booking again.</p></div>
+      <div class="card p-6"><div class="text-3xl">🔔</div><b class="block mt-2 text-temple-900">Reminder & live link</b><p class="text-sm text-gray-600 mt-1">WhatsApp reminder one day before with the live link.</p></div>
+      <div class="card p-6"><div class="text-3xl">⏸</div><b class="block mt-2 text-temple-900">Pause or cancel anytime</b><p class="text-sm text-gray-600 mt-1">Manage from My Account – no lock-in.</p></div>
+    </div>
+  </section>
+</main>
+<div id="site-footer"></div>
+<script>
+$('#hero').innerHTML = pageHero('Pooja Subscriptions', 'Automatic archana on every Pradosham, Pournami, Sashti and Amavasai – in your family\'s name, every month.', [[t('services')], ['Subscriptions']]);
+$('#plans').innerHTML = SUB_PLANS.map(p => `<div class="card p-6 flex flex-col ${p.best ? 'ring-2 ring-gold-400 relative' : ''}">${p.best ? '<span class="chip bg-gold-400 text-temple-900 absolute -top-3 left-1/2 -translate-x-1/2">Best value</span>' : ''}
+  <div class="text-4xl">${p.icon}</div><b class="text-lg text-temple-900 mt-3">${esc(L(p, 'name', 'ta'))}</b><p class="text-xs text-gray-500">${p.per}</p>
+  <p class="text-3xl font-extrabold text-temple-700 mt-4">${rupee(p.price)}<span class="text-sm font-medium text-gray-500">/month</span></p>
+  <button data-p="${p.id}" class="btn ${p.best ? 'btn-gold' : 'btn-outline'} mt-auto pt-3 w-full">Subscribe</button></div>`).join('');
+$$('[data-p]').forEach(b => b.onclick = () => {
+  const p = SUB_PLANS.find(x => x.id === b.dataset.p), fam = store.get('family', []);
+  const m = modal(`<form class="p-7"><h3 class="font-display text-2xl text-temple-900">${esc(p.name)}</h3><p class="text-sm text-gray-600">${rupee(p.price)}/month · auto-renews, cancel anytime</p>
+    <label class="label mt-4">Name for archana</label><input class="field" name="n" required value="${esc(fam[0]?.name || user()?.name || '')}">
+    <div class="grid grid-cols-2 gap-3 mt-3"><div><label class="label">நட்சத்திரம்</label><select class="field" name="k" required><option value="">—</option>${NAKSHATRAS.map(n => `<option ${fam[0]?.nak === n ? 'selected' : ''}>${n}</option>`).join('')}</select></div>
+    <div><label class="label">Mobile (WhatsApp)</label><input class="field" name="m" required value="${esc(user()?.mobile || '')}"></div></div>
+    <label class="label mt-3">Payment</label><select class="field"><option>UPI AutoPay</option><option>Card (recurring)</option><option>International card (Stripe)</option></select>
+    <button class="btn btn-gold w-full mt-5">Start subscription</button></form>`);
+  $('form', m).onsubmit = e => { e.preventDefault(); const f = new FormData(e.target);
+    const subs = store.get('subs', []); subs.unshift({ id: genId('SB'), plan: p.name, price: p.price, name: f.get('n'), nak: f.get('k'), next: SPECIAL_DAYS[0].date, active: true }); store.set('subs', subs);
+    m.remove(); toast('🙏 Subscription active. Manage it in My Account.'); };
+});
+</script>
+</body>
+</html>

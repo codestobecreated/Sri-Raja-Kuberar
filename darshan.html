@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Special Darshan Slot Booking – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main>
+  <div id="hero"></div>
+  <section class="max-w-5xl mx-auto px-4 py-10 grid lg:grid-cols-5 gap-8">
+    <div class="lg:col-span-3 card p-6 space-y-5" id="form">
+      <div><label class="label">1. Select date</label><div id="dates" class="flex gap-2 overflow-x-auto no-scrollbar pb-1"></div></div>
+      <div><label class="label">2. Select time slot</label><div id="slots" class="grid grid-cols-3 sm:grid-cols-4 gap-2"></div></div>
+      <div class="grid sm:grid-cols-3 gap-3"><div><label class="label">Ticket type</label><select id="type" class="field"><option value="250">Special – ₹250</option><option value="500">VIP + Archana – ₹500</option></select></div>
+        <div><label class="label">Persons</label><input id="persons" type="number" min="1" max="10" value="2" class="field"></div>
+        <div><label class="label">Mobile</label><input id="mobile" class="field" inputmode="tel" placeholder="98765 43210"></div></div>
+      <div><label class="label">Lead devotee name</label><input id="name" class="field"></div>
+      <button id="book" class="btn btn-gold w-full">Pay <span id="amt"></span> & get QR ticket</button>
+    </div>
+    <aside class="lg:col-span-2 space-y-4">
+      <div id="ticket" class="card p-6 text-center text-gray-500"><div class="text-5xl">🎟</div><p class="mt-2 text-sm">Your QR ticket will appear here. Show it at the entrance.</p></div>
+      <div class="card p-5 text-sm text-gray-700"><b class="text-temple-900">Guidelines</b><ul class="list-disc pl-5 mt-2 space-y-1"><li>Arrive 15 minutes before your slot</li><li>Traditional dress preferred</li><li>One QR covers all persons in the booking</li><li>Mobile phones must be switched off inside the sanctum</li></ul></div>
+    </aside>
+  </section>
+</main>
+<div id="site-footer"></div>
+<script>
+$('#hero').innerHTML = pageHero('Special Darshan · சிறப்பு தரிசனம்', 'Book a time slot for priority darshan and receive a QR code ticket.', [[t('services')], ['Special Darshan']]);
+const SLOTS = ['06:30 AM', '07:30 AM', '08:30 AM', '09:30 AM', '10:30 AM', '11:30 AM', '04:30 PM', '05:30 PM', '06:30 PM', '07:30 PM', '08:30 PM'];
+const S = { date: null, slot: null };
+const days = [...Array(14)].map((_, i) => { const d = new Date(); d.setDate(d.getDate() + i); return d.toISOString().slice(0, 10); });
+S.date = days[0];
+const cap = (d, s) => (d.charCodeAt(9) * 7 + s.charCodeAt(1) * 3) % 30; // demo seats left
+function draw() {
+  $('#dates').innerHTML = days.map(d => { const dt = new Date(d + 'T00:00:00'); return `<button data-d="${d}" class="shrink-0 w-16 rounded-xl border-2 py-2 text-center ${d === S.date ? 'border-gold-400 bg-gold-50' : 'border-gray-200'}"><span class="block text-[11px] text-gray-500">${dt.toLocaleDateString('en', { weekday: 'short' })}</span><b class="text-lg text-temple-900">${dt.getDate()}</b><span class="block text-[11px] text-gray-500">${dt.toLocaleDateString('en', { month: 'short' })}</span></button>`; }).join('');
+  $('#slots').innerHTML = SLOTS.map(s => { const left = cap(S.date, s); return `<button data-s="${s}" ${left ? '' : 'disabled'} class="rounded-xl border-2 py-2 text-sm ${s === S.slot ? 'border-temple-600 bg-temple-50 font-bold' : 'border-gray-200'} disabled:opacity-40 disabled:line-through"><b class="block">${s}</b><span class="text-[10px] ${left < 6 ? 'text-red-600' : 'text-gray-500'}">${left ? left + ' left' : 'Full'}</span></button>`; }).join('');
+  $$('[data-d]').forEach(b => b.onclick = () => { S.date = b.dataset.d; S.slot = null; draw(); });
+  $$('[data-s]').forEach(b => b.onclick = () => { S.slot = b.dataset.s; draw(); });
+  $('#amt').textContent = rupee($('#type').value * ($('#persons').value || 1));
+}
+$('#type').onchange = $('#persons').oninput = draw;
+$('#book').onclick = () => {
+  if (!S.slot) return toast('Please choose a time slot'); if (!$('#name').value.trim() || !/^\d{10}$/.test($('#mobile').value.replace(/\D/g, '').slice(-10))) return toast('Enter name and a valid mobile number');
+  const id = genId('DS'), n = +$('#persons').value;
+  const tk = { id, date: S.date, slot: S.slot, persons: n, name: $('#name').value, mobile: $('#mobile').value, amount: $('#type').value * n, created: new Date().toISOString() };
+  const all = store.get('darshan', []); all.unshift(tk); store.set('darshan', all);
+  $('#ticket').innerHTML = `<div class="fade-up"><p class="text-xs text-gold-700 font-bold tracking-widest">SPECIAL DARSHAN TICKET</p><div id="qr" class="mx-auto my-4 w-44 h-44 grid place-items-center"></div>
+    <b class="text-xl tracking-wider text-temple-900">${id}</b><p class="text-sm text-gray-700 mt-1">${esc(tk.name)} · ${n} person(s)</p><p class="text-sm font-semibold text-temple-700">${fmtDate(S.date, { weekday: 'short', day: 'numeric', month: 'short' })} · ${S.slot}</p>
+    <button onclick="print()" class="btn btn-outline text-sm !py-2 mt-4">⬇ Save ticket</button></div>`;
+  if (window.QRCode) new QRCode($('#qr'), { text: `RK-DARSHAN|${id}|${S.date}|${S.slot}|${n}`, width: 176, height: 176, colorDark: '#14432d' }); else $('#qr').textContent = id;
+  toast('✅ Darshan booked. Ticket sent on WhatsApp.');
+};
+draw();
+</script>
+</body>
+</html>

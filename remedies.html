@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nakshatra Remedy Finder – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main><div id="hero"></div>
+  <section class="max-w-4xl mx-auto px-4 py-10">
+    <form id="f" class="card p-6 grid sm:grid-cols-3 gap-4 items-end">
+      <div><label class="label">Date of birth</label><input type="date" id="dob" class="field"></div>
+      <div><label class="label">Time of birth</label><input type="time" id="tob" class="field" value="06:00"></div>
+      <div><label class="label">or pick nakshatra</label><select id="nk" class="field"><option value="">— from DOB —</option>${''}</select></div>
+      <button class="btn btn-gold sm:col-span-3">🔮 Find my remedies</button>
+    </form>
+    <div id="out" class="mt-8"></div>
+  </section></main>
+<div id="site-footer"></div>
+<script>
+$('#hero').innerHTML = pageHero('Nakshatra Remedy Finder', 'Find your birth nakshatra and the poojas suited to you.', [[t('panchangam')], ['Remedies']]);
+$('#nk').innerHTML += NAKSHATRAS.map((n, i) => `<option value="${i}">${n} · ${NAKSHATRAS_EN[i]}</option>`).join('');
+const DEITY = ['Ganesha', 'Durga', 'Murugan', 'Kuberar', 'Shiva', 'Navagraha', 'Lakshmi', 'Shiva', 'Navagraha'];
+$('#f').onsubmit = e => { e.preventDefault();
+  let i = $('#nk').value;
+  if (i === '') { if (!$('#dob').value) return toast('Enter date of birth'); i = panchang(new Date($('#dob').value + 'T' + $('#tob').value)).nkIndex; }
+  i = +i; const group = i % 3, recs = REMEDIES[group].map(id => POOJAS.find(p => p.id === id));
+  store.set('myNak', i);
+  $('#out').innerHTML = `<div class="kolam-bg rounded-3xl text-white p-6 text-center fade-up"><p class="text-gold-200 text-sm">Your birth nakshatra</p><h2 class="font-display text-4xl mt-1">${NAKSHATRAS[i]} · ${NAKSHATRAS_EN[i]}</h2>
+    <p class="mt-2 text-sm text-temple-50/90">Adhi devata: ${DEITY[i % 9]} · Favourable days: ${['Monday', 'Thursday', 'Friday'][group]}</p></div>
+    <h3 class="font-display text-2xl text-temple-900 mt-8 mb-4">Recommended poojas for you</h3><div class="grid sm:grid-cols-2 gap-6">${recs.map(poojaCard).join('')}</div>
+    <div class="card p-6 mt-6 flex flex-wrap items-center justify-between gap-4"><div><b class="text-temple-900">🔔 Remind me before my nakshatra day</b><p class="text-sm text-gray-600">We'll send a WhatsApp reminder every month so you can book an archana.</p></div><button id="rem" class="btn btn-green text-sm">Turn on reminders</button></div>
+    <p class="text-xs text-gray-500 mt-4">Nakshatra from date of birth is approximate. Please confirm with your horoscope.</p>`;
+  $('#rem').onclick = () => { if (!user()) return location.href = 'login.html?next=remedies.html'; const u = user(); u.nakReminder = i; store.set('user', u); toast('🔔 Monthly reminder set for ' + NAKSHATRAS[i]); };
+};
+</script>
+</body>
+</html>

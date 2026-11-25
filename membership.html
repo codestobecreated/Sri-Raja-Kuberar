@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Membership – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main><div id="hero"></div><section class="max-w-6xl mx-auto px-4 py-12"><div id="plans" class="grid md:grid-cols-3 gap-6 items-stretch"></div>
+  <p class="text-center text-sm text-gray-600 mt-8">Honorary Trusteeship of Om Sri Raja Kubera Siddhar Peedam is a privilege granted to the immensely blessed.</p></section></main>
+<div id="site-footer"></div>
+<script>
+$('#hero').innerHTML = pageHero(t('membership'), 'Become a member of the peedam family and receive blessings all year round.', [[t('membership')]]);
+$('#plans').innerHTML = MEMBERSHIP.map(m => `<div class="card p-7 flex flex-col ${m.best ? 'ring-2 ring-gold-400 md:-translate-y-3 relative' : ''}">${m.best ? '<span class="chip bg-gold-400 text-temple-900 absolute -top-3 left-1/2 -translate-x-1/2">Most popular</span>' : ''}
+  <h2 class="font-display text-2xl text-temple-900">${m.name}</h2><p class="text-4xl font-extrabold text-temple-700 mt-3">${rupee(m.price)}<span class="text-sm text-gray-500 font-medium"> / ${m.per}</span></p>
+  <ul class="mt-5 space-y-2 text-sm text-gray-700 flex-1">${m.perks.map(p => `<li>✅ ${p}</li>`).join('')}</ul>
+  <button data-m="${m.id}" class="btn ${m.best ? 'btn-gold' : 'btn-outline'} w-full mt-6">Become a ${m.name}</button></div>`).join('');
+$$('[data-m]').forEach(b => b.onclick = () => { const m = MEMBERSHIP.find(x => x.id === b.dataset.m);
+  if (!user() || user().guest) return location.href = 'login.html?next=membership.html';
+  const u = user(); u.membership = { plan: m.name, since: new Date().toISOString().slice(0, 10) }; store.set('user', u); toast(`🙏 Welcome, ${esc(m.name)} member!`); });
+</script>
+</body>
+</html>

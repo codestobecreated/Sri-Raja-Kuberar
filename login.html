@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Login / Sign Up – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main class="min-h-[70vh] grid lg:grid-cols-2">
+  <div class="hidden lg:block relative"><script>document.write(imgTag(IMG.hero[0], 'absolute inset-0 w-full h-full object-cover'))</script><div class="absolute inset-0 bg-temple-900/70 grid place-items-center p-12 text-center"><div><h2 class="font-display text-4xl text-gold-200">அன்னம் பரம்பிரம்மம்</h2><p class="text-white mt-3">Save your family profiles once – book poojas with a single click.</p></div></div></div>
+  <div class="grid place-items-center px-4 py-12"><div class="w-full max-w-sm">
+    <h1 class="font-display text-3xl text-temple-900">Login or sign up</h1><p class="text-sm text-gray-600 mt-1">Just your mobile number – we'll send an OTP. No password needed.</p>
+    <form id="f1" class="mt-6 space-y-3"><div><label class="label">Mobile number</label><div class="flex gap-2"><select class="field !w-24" id="cc"><option>+91</option><option>+65</option><option>+60</option><option>+971</option><option>+1</option><option>+44</option></select><input id="mob" class="field" inputmode="tel" placeholder="98765 43210" required></div></div>
+      <div id="name-row"><label class="label">Your name (new users)</label><input id="name" class="field" placeholder="Full name"></div>
+      <button class="btn btn-gold w-full">Send OTP</button></form>
+    <form id="f2" class="mt-6 space-y-3 hidden"><label class="label">Enter the 4-digit OTP</label><input id="otp" class="field text-center text-2xl tracking-[.6em] font-bold" maxlength="4" inputmode="numeric" required>
+      <button class="btn btn-gold w-full">Verify & continue</button><button type="button" id="resend" class="text-sm text-temple-700 font-semibold w-full">Resend OTP</button></form>
+    <p class="text-xs text-gray-500 mt-6">Forgot password? There isn't one – logging in with OTP also resets your access. By continuing you agree to our <a href="policy.html?p=terms" class="underline">Terms</a> & <a href="policy.html?p=privacy" class="underline">Privacy Policy</a>.</p>
+    <a href="poojas.html" class="block text-center text-sm text-gray-600 mt-6">or continue as guest →</a>
+  </div></div>
+</main>
+<div id="site-footer"></div>
+<script>
+let mobile;
+$('#f1').onsubmit = e => { e.preventDefault(); mobile = $('#cc').value + ' ' + $('#mob').value.trim(); if (sendOtp($('#mob').value)) { $('#f1').classList.add('hidden'); $('#f2').classList.remove('hidden'); $('#otp').focus(); } };
+$('#resend').onclick = () => sendOtp($('#mob').value);
+$('#f2').onsubmit = e => { e.preventDefault(); if (!verifyOtp($('#otp').value)) return toast('Incorrect OTP');
+  const prev = user(); store.set('user', { ...(prev || {}), name: $('#name').value || prev?.name || 'Devotee', mobile, guest: false, refCode: prev?.refCode || 'RKREF' + Math.floor(1000 + Math.random() * 9000) });
+  store.set('refCode', user().refCode);
+  toast('🙏 Welcome!'); setTimeout(() => location.href = qs('next') || 'account.html', 600); };
+</script>
+</body>
+</html>

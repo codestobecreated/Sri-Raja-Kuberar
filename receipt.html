@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Receipt – Sri Raja Kuberar</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+<style>@page { size: A4; margin: 12mm; }</style>
+</head>
+<body class="font-sans bg-gray-100 print:bg-white">
+<div class="no-print max-w-3xl mx-auto px-4 pt-6 flex justify-between"><a href="javascript:history.back()" class="text-temple-700 font-semibold">← Back</a><button onclick="print()" class="btn btn-green text-sm !py-2">⬇ Download / Print PDF</button></div>
+<main id="doc" class="max-w-3xl mx-auto my-6 bg-white shadow-soft print:shadow-none"></main>
+<script>
+// Works for: booking (default), type=cert (sankalpam certificate), type=donation, type=order
+const id = qs('id'), type = qs('type') || 'booking';
+const src = type === 'donation' ? store.get('donations', []) : type === 'order' ? store.get('orders', []) : [DEMO_BOOKING, ...store.get('bookings', [])];
+const b = src.find(x => x.id === id);
+const head = title => `<div class="flex items-center justify-between border-b-2 border-gold-400 pb-4">
+  <div class="flex items-center gap-3">${imgTag(IMG.logo, 'w-16 h-16 rounded-full bg-temple-900')}<div><b class="font-display text-xl text-temple-900">${SITE.name}</b><p class="text-xs text-gray-500 max-w-xs">${SITE.address}</p><p class="text-xs text-gray-500">${SITE.phone} · ${SITE.email}</p></div></div>
+  <div class="text-right"><b class="text-lg text-maroon-600 uppercase tracking-wider">${title}</b><p class="text-xs text-gray-500">No: ${b.id}</p><p class="text-xs text-gray-500">${new Date(b.created).toLocaleDateString('en-IN', { dateStyle: 'medium' })}</p></div></div>`;
+const amt = x => x.currency && x.currency !== 'INR' ? x.currency + ' ' + x.amount : rupee(x.amount);
+if (!b) $('#doc').innerHTML = `<div class="p-12 text-center"><div class="text-5xl">🧾</div><p class="mt-3">Receipt not found.</p></div>`;
+else if (type === 'cert') {
+  $('#doc').innerHTML = `<div class="p-6"><div class="border-[6px] border-double border-gold-500 p-10 text-center bg-gold-50/40">
+    <p class="text-gold-700 tracking-[.3em] text-xs font-bold">ஓம் நமசிவாய · OM NAMAH SHIVAYA</p>
+    ${imgTag(IMG.logo, 'w-20 h-20 mx-auto mt-4 rounded-full bg-temple-900')}
+    <h1 class="font-display text-4xl text-temple-900 mt-4">Sankalpam Certificate</h1><p class="text-sm text-gray-500">சங்கல்ப சான்றிதழ்</p>
+    <p class="mt-8 text-gray-700">This is to certify that the sacred</p><h2 class="font-display text-2xl text-maroon-600 mt-1">${esc(b.name)}</h2>
+    <p class="text-gray-700 mt-1">was performed at <b>${esc(b.temple)}</b> on <b>${fmtDate(b.date)}</b> at ${b.time}<br>with sankalpam in the names of</p>
+    <div class="mt-4 inline-block text-left">${b.members.map(m => `<p class="font-semibold text-temple-900">🙏 ${esc(m.name)} <span class="font-normal text-sm text-gray-600">· ${m.nak} · ${m.rasi} · ${m.goth}</span></p>`).join('')}</div>
+    <p class="mt-8 text-gray-700 italic">May the divine grace of Sri Raja Kuberar bless you and your family with health, wealth and peace.</p>
+    <div class="mt-10 flex justify-between items-end text-sm"><span>Booking ID: <b>${b.id}</b></span><div class="text-center"><div class="font-display text-lg text-temple-800">Swamigal</div><div class="border-t border-gray-400 w-40 mt-1 pt-1 text-xs text-gray-500">Peedam Seal & Signature</div></div></div>
+  </div></div>`;
+} else {
+  const rows = type === 'donation' ? [[`Donation – ${b.cause}`, amt(b)]] : type === 'order' ? b.items.map(i => [`${i.name} × ${i.qty}`, rupee(i.price * i.qty)]) : [[`${b.name} – ${b.pkg} package (${fmtDate(b.date)})`, amt(b)]];
+  $('#doc').innerHTML = `<div class="p-10">${head(type === 'donation' ? 'Donation Receipt' : 'Payment Receipt')}
+    <div class="grid grid-cols-2 gap-6 mt-6 text-sm"><div><p class="text-gray-500 text-xs uppercase">Received from</p><b>${esc(b.contact || b.name)}</b><p>${esc(b.mobile || '')}</p>${b.pan ? `<p>PAN: ${esc(b.pan)}</p>` : ''}</div>
+      <div class="text-right"><p class="text-gray-500 text-xs uppercase">Payment</p><b>${(b.method || 'online').toUpperCase()}</b><p class="text-green-700 font-semibold">PAID</p></div></div>
+    <table class="w-full mt-6 text-sm"><thead><tr class="bg-temple-800 text-white"><th class="text-left p-3">Description</th><th class="text-right p-3">Amount</th></tr></thead>
+      <tbody>${rows.map(r => `<tr class="border-b"><td class="p-3">${esc(r[0])}</td><td class="p-3 text-right">${r[1]}</td></tr>`).join('')}</tbody>
+      <tfoot><tr><td class="p-3 text-right font-bold">Total</td><td class="p-3 text-right font-bold text-lg text-temple-800">${amt(b)}</td></tr></tfoot></table>
+    ${type === 'donation' ? '<p class="text-xs text-gray-500 mt-4">Donations to the registered trust may be eligible for deduction under Section 80G of the Income Tax Act (subject to the trust\'s registration).</p>' : ''}
+    ${b.members ? `<div class="mt-6 text-sm"><b>Sankalpam names:</b> ${b.members.map(m => esc(m.name)).join(', ')}</div>` : ''}
+    <p class="text-xs text-gray-400 mt-10 text-center">This is a computer-generated receipt and does not need a signature.</p></div>`;
+}
+</script>
+</body>
+</html>

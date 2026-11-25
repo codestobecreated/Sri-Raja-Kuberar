@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Policies – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main><div id="hero"></div><section class="max-w-6xl mx-auto px-4 py-10 grid lg:grid-cols-4 gap-8"><nav id="nav" class="card p-3 h-fit lg:sticky lg:top-24 flex lg:flex-col gap-1 overflow-x-auto"></nav><article id="doc" class="lg:col-span-3 card p-6 md:p-10 text-gray-700 leading-relaxed space-y-4"></article></section></main>
+<div id="site-footer"></div>
+<script>
+// Template policy text – have it reviewed by the trust's legal advisor before going live.
+const P = {
+  terms: ['Terms & Conditions', `<p>By using this website and booking any service, you agree to these terms.</p><h2>Bookings</h2><p>Poojas are performed on the date shown on the pooja page. Sankalpam details you enter (names, nakshatra, rasi, gothram) are recited exactly as provided; please check them before payment.</p><h2>Video & photo proof</h2><p>Video and photos are shared on the WhatsApp number provided, usually within 24 hours after the pooja. Recordings are for personal use.</p><h2>Prasadam</h2><p>Prasadam is a blessed offering and may vary in contents. Delivery timelines are in our Shipping Policy.</p><h2>Pricing</h2><p>Prices are in INR. International payments are converted at the payment provider's rate.</p><h2>Conduct</h2><p>Reviews must be truthful and respectful. We may remove content that violates these terms.</p><h2>Contact</h2><p>${SITE.email} · ${SITE.phone}</p>`],
+  privacy: ['Privacy Policy', `<p>We respect your privacy and collect only what is needed to perform your pooja and deliver prasadam.</p><h2>What we collect</h2><p>Name, mobile number, email, sankalpam details (names, nakshatra, rasi, gothram), delivery address and payment status. Card and UPI details are handled by Razorpay / Stripe and never stored by us.</p><h2>How we use it</h2><p>To perform poojas, send booking updates on WhatsApp/SMS/email, deliver prasadam, issue receipts, and – only with your consent – send newsletters and reminders.</p><h2>Sharing</h2><p>Shared only with priests performing the pooja, courier partners and payment processors. We never sell your data.</p><h2>Your choices</h2><p>You can update family profiles, unsubscribe from messages, or request deletion of your account by contacting us.</p><h2>Cookies</h2><p>We use essential storage to remember your cart, language and login.</p>`],
+  refund: ['Refund & Cancellation Policy', `<h2>Cancellation by devotee</h2><p>Bookings cancelled <b>before the booking cutoff date</b> receive a full refund. After the cutoff, preparations and sankalpam lists are finalised and the booking cannot be cancelled, but it may be moved to another date once.</p><h2>Cancellation by temple</h2><p>If a pooja cannot be performed for any reason, you will receive a full refund or may choose another date.</p><h2>Products</h2><p>Divine Collections items may be returned unused within 7 days of delivery. Prasadam cannot be returned.</p><h2>Donations</h2><p>Donations are non-refundable once a receipt is issued.</p><h2>Refund timeline</h2><p>Refunds are processed within 5–7 working days to the original payment method.</p>`],
+  shipping: ['Shipping Policy', `<h2>Prasadam dispatch</h2><p>Prasadam is dispatched within 2 working days after the pooja date.</p><h2>Delivery time</h2><p>India: 3–7 working days. International: 10–20 working days, depending on customs.</p><h2>Charges</h2><p>Prasadam delivery is ₹99 within India. Products ship free on orders above ₹999. International rates are shown at checkout.</p><h2>Tracking</h2><p>A courier tracking number is sent on WhatsApp and SMS as soon as your parcel is dispatched, and is also visible on the Track Booking page.</p><h2>Damaged parcels</h2><p>Please share a photo on WhatsApp within 48 hours of delivery and we will reship.</p>`]
+};
+const k = P[qs('p')] ? qs('p') : 'terms';
+document.title = P[k][0] + ' – Sri Raja Kuberar';
+$('#hero').innerHTML = pageHero(P[k][0], 'Last updated: 1 November 2026', [[P[k][0]]]);
+$('#nav').innerHTML = Object.entries(P).map(([id, v]) => `<a href="policy.html?p=${id}" class="shrink-0 px-3 py-2 rounded-xl text-sm font-semibold ${id === k ? 'tab-active' : 'hover:bg-temple-50'}">${v[0]}</a>`).join('');
+$('#doc').innerHTML = P[k][1].replace(/<h2>/g, '<h2 class="font-display text-2xl text-temple-900 pt-2">');
+</script>
+</body>
+</html>

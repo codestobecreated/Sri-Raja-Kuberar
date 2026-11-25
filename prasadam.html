@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Order Prasadam – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main><div id="hero"></div><section class="max-w-6xl mx-auto px-4 py-12"><div id="list" class="grid md:grid-cols-3 gap-6"></div>
+  <div class="card p-6 mt-10 grid md:grid-cols-3 gap-4 text-sm text-center"><div>📦 Dispatched within 2 days</div><div>🚚 Courier tracking on WhatsApp</div><div>🌍 Ships to India & abroad</div></div></section></main>
+<div id="site-footer"></div>
+<script>
+$('#hero').innerHTML = pageHero('Order Prasadam', 'Receive blessed prasadam from the peedam – no pooja booking needed.', [[t('services')], ['Prasadam']]);
+$('#list').innerHTML = PRASADAM.map((p, i) => `<div class="card overflow-hidden flex flex-col">${imgTag([IMG.service[4], IMG.gallery[2], IMG.service[3]][i], 'w-full aspect-[4/3] object-cover', p.name)}<div class="p-5 flex flex-col flex-1"><b class="text-lg text-temple-900">${p.name}</b><p class="text-sm text-gray-600 mt-1 flex-1">${p.items}</p><p class="text-2xl font-extrabold text-temple-700 mt-3">${rupee(p.price)}</p><button onclick="cart.add('${p.id}',1,'prasadam')" class="btn btn-gold w-full mt-4">Add to cart</button></div></div>`).join('');
+</script>
+</body>
+</html>

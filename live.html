@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Live Darshan – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main>
+  <div id="hero"></div>
+  <section class="max-w-7xl mx-auto px-4 py-10 grid lg:grid-cols-3 gap-8">
+    <div class="lg:col-span-2">
+      <div class="rounded-3xl overflow-hidden bg-black aspect-video relative" id="player"></div>
+      <div class="flex flex-wrap items-center justify-between gap-3 mt-4"><div><span class="chip bg-red-600 text-white"><span class="w-2 h-2 rounded-full bg-white pulse-dot"></span>LIVE</span><h2 class="font-display text-2xl text-temple-900 mt-2" id="now-title"></h2></div>
+        <div class="flex gap-2"><button id="notify" class="btn btn-outline text-sm !py-2">🔔 Notify me</button><a href="poojas.html" class="btn btn-gold text-sm !py-2">Book sankalpam</a></div></div>
+    </div>
+    <aside><h3 class="font-display text-2xl text-temple-900 mb-4">Upcoming streams</h3><div id="up" class="space-y-3"></div>
+      <div class="card p-5 mt-6 bg-gold-50"><b class="text-temple-900">📲 Get reminders</b><p class="text-sm text-gray-600 mt-1">Booked devotees receive the live link on WhatsApp one day before. Install our app to get push notifications for every live stream.</p></div></aside>
+  </section>
+</main>
+<div id="site-footer"></div>
+<script>
+$('#hero').innerHTML = pageHero(t('live'), 'Watch major yagnas, homams and daily aarti live from the peedam.', [[t('live')]]);
+const now = LIVE.find(l => l.live) || LIVE[0];
+$('#now-title').textContent = now.title;
+// Set SITE.youtube to the temple channel's live embed URL; poster shown until then
+$('#player').innerHTML = `${imgTag(now.img, 'w-full h-full object-cover opacity-80')}<button id="play" class="absolute inset-0 grid place-items-center"><span class="w-20 h-20 rounded-full bg-white/90 grid place-items-center text-3xl text-temple-800 shadow-xl">▶</span></button>`;
+$('#play').onclick = () => !SITE.youtube ? toast('Add the temple YouTube channel ID in assets/data.js (SITE.youtube) to start the stream') : $('#player').innerHTML = `<iframe class="w-full h-full" src="${SITE.youtube}&autoplay=1" allow="autoplay; encrypted-media" allowfullscreen title="Live darshan"></iframe>`;
+$('#up').innerHTML = LIVE.map(l => `<div class="card p-3 flex gap-3 items-center">${imgTag(l.img, 'w-24 h-16 rounded-xl object-cover')}<div class="flex-1"><b class="text-sm text-temple-900">${esc(l.title)}</b><p class="text-xs ${l.live ? 'text-red-600 font-bold' : 'text-gray-500'}">${l.when}</p></div></div>`).join('');
+$('#notify').onclick = async () => {
+  if (!('Notification' in window)) return toast('Notifications are not supported on this browser');
+  const p = await Notification.requestPermission();
+  toast(p === 'granted' ? '🔔 You will be notified before every live stream' : 'Notifications blocked – you can enable them in browser settings');
+};
+</script>
+</body>
+</html>

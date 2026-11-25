@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="40%" r="65%"><stop offset="0" stop-color="#8c2a1c"/><stop offset="1" stop-color="#3d0e0b"/></radialGradient>
+    <linearGradient id="gd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fbdb8a"/><stop offset="1" stop-color="#d98c12"/></linearGradient>
+  </defs>
+  <circle cx="60" cy="60" r="58" fill="url(#bg)"/>
+  <circle cx="60" cy="60" r="52" fill="none" stroke="url(#gd)" stroke-width="2"/>
+  <g fill="url(#gd)">
+    <!-- 16 petals -->
+    <g id="p"><path d="M60 10 q5 7 0 14 q-5 -7 0 -14z"/></g>
+    <use href="#p" transform="rotate(22.5 60 60)"/><use href="#p" transform="rotate(45 60 60)"/><use href="#p" transform="rotate(67.5 60 60)"/>
+    <use href="#p" transform="rotate(90 60 60)"/><use href="#p" transform="rotate(112.5 60 60)"/><use href="#p" transform="rotate(135 60 60)"/>
+    <use href="#p" transform="rotate(157.5 60 60)"/><use href="#p" transform="rotate(180 60 60)"/><use href="#p" transform="rotate(202.5 60 60)"/>
+    <use href="#p" transform="rotate(225 60 60)"/><use href="#p" transform="rotate(247.5 60 60)"/><use href="#p" transform="rotate(270 60 60)"/>
+    <use href="#p" transform="rotate(292.5 60 60)"/><use href="#p" transform="rotate(315 60 60)"/><use href="#p" transform="rotate(337.5 60 60)"/>
+  </g>
+  <text x="60" y="76" text-anchor="middle" font-family="Noto Sans Devanagari, Mangal, serif" font-size="44" fill="url(#gd)">ॐ</text>
+</svg>

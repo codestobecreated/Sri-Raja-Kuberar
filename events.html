@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Festivals & Events – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main><div id="hero"></div><section class="max-w-7xl mx-auto px-4 py-12"><div id="list" class="grid md:grid-cols-3 gap-6"></div></section></main>
+<div id="site-footer"></div>
+<script>
+$('#hero').innerHTML = pageHero('Festivals & Events', 'Register for Kumbabishekam, Brahmotsavam and special homams. Seats are limited.', [[t('services')], ['Events']]);
+const reg = () => store.get('events', {});
+function draw() {
+  $('#list').innerHTML = EVENTS.map(e => { const left = e.left - (reg()[e.id] || 0), pc = 100 - left / e.seats * 100;
+    return `<div class="card overflow-hidden flex flex-col">${imgTag(e.img, 'w-full aspect-[16/10] object-cover', e.name)}<div class="p-5 flex flex-col flex-1">
+    <span class="chip bg-gold-100 text-gold-700 w-fit">📅 ${fmtDate(e.date, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}</span><h2 class="font-display text-2xl text-temple-900 mt-2">${esc(e.name)}</h2>
+    <div class="mt-4 h-2 rounded-full bg-gray-100"><div class="h-2 rounded-full ${left < 20 ? 'bg-red-500' : 'bg-temple-500'}" style="width:${pc}%"></div></div>
+    <p class="text-xs mt-2 ${left < 20 ? 'text-red-600 font-bold' : 'text-gray-600'}">${left > 0 ? left + ' of ' + e.seats + ' seats left' : 'Registration full'}</p>
+    <p class="mt-2 font-bold text-temple-700">${e.price ? rupee(e.price) + ' per seat' : 'Free registration'}</p>
+    <button data-e="${e.id}" ${left > 0 ? '' : 'disabled'} class="btn btn-gold mt-auto w-full">${left > 0 ? 'Register' : 'Full'}</button></div></div>`; }).join('');
+  $$('[data-e]').forEach(b => b.onclick = () => { const e = EVENTS.find(x => x.id === b.dataset.e);
+    const m = modal(`<form class="p-7"><h3 class="font-display text-2xl text-temple-900">${esc(e.name)}</h3><div class="grid gap-3 mt-4"><input class="field" name="n" placeholder="Full name" required><input class="field" name="m" placeholder="Mobile number" required inputmode="tel"><label class="label">Seats</label><input class="field" name="s" type="number" min="1" max="5" value="1"></div><button class="btn btn-gold w-full mt-5">Confirm ${e.price ? '& pay' : 'registration'}</button></form>`);
+    $('form', m).onsubmit = ev => { ev.preventDefault(); const r = reg(); r[e.id] = (r[e.id] || 0) + +new FormData(ev.target).get('s'); store.set('events', r); m.remove(); draw(); toast('✅ Registered! Entry pass sent on WhatsApp.'); }; });
+}
+draw();
+</script>
+</body>
+</html>

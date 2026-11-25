@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Donate – Sri Raja Kuberar</title>
+<link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;600;700;800&family=Noto+Sans+Tamil:wght@400;600;700&family=Noto+Serif+Tamil:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script><script src="assets/tw.js"></script><link rel="stylesheet" href="assets/style.css">
+<script src="assets/data.js"></script><script src="assets/app.js"></script>
+</head>
+<body class="font-sans">
+<div id="site-header"></div>
+<main><div id="hero"></div>
+  <section class="max-w-7xl mx-auto px-4 py-10 grid lg:grid-cols-5 gap-8">
+    <div class="lg:col-span-3"><div id="causes" class="grid sm:grid-cols-2 gap-5"></div>
+      <div class="card p-6 mt-8 bg-gold-50 border-gold-200"><h2 class="font-display text-2xl text-temple-900">🎂 Annadhanam sponsorship by date</h2><p class="text-sm text-gray-700 mt-1">Sponsor annadhanam on a birthday, anniversary or remembrance day. We serve devotees in your family's name and send you photos of the seva on WhatsApp.</p>
+        <div class="grid sm:grid-cols-3 gap-3 mt-4"><div><label class="label">Date</label><input type="date" id="sp-date" class="field"></div><div><label class="label">Occasion</label><select id="sp-occ" class="field"><option>Birthday</option><option>Wedding anniversary</option><option>Remembrance (Thithi)</option><option>Other</option></select></div>
+          <div><label class="label">Meals</label><select id="sp-meals" class="field"><option value="2500">50 devotees – ₹2,500</option><option value="5000">100 devotees – ₹5,000</option><option value="11000">Full day – ₹11,000</option></select></div></div>
+        <button id="sp-btn" class="btn btn-green mt-4">Sponsor this date</button></div></div>
+    <aside class="lg:col-span-2"><form id="f" class="card p-6 lg:sticky lg:top-24 space-y-3">
+      <h2 class="font-display text-2xl text-temple-900">Make a donation</h2>
+      <div><label class="label">Cause</label><select id="cause" class="field"></select></div>
+      <div><label class="label">Amount</label><div class="grid grid-cols-4 gap-2" id="amts"></div><input id="amt" type="number" min="11" class="field mt-2" placeholder="Other amount" required></div>
+      <div class="grid grid-cols-2 gap-3"><input id="n" class="field" placeholder="Full name" required value="${''}"><input id="m" class="field" placeholder="Mobile" required inputmode="tel"></div>
+      <input id="e" type="email" class="field" placeholder="Email for receipt">
+      <input id="pan" class="field" placeholder="PAN (optional, for 80G receipt)" maxlength="10">
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="monthly" class="accent-temple-600"> Make this a monthly donation</label>
+      <label class="flex items-center gap-2 text-sm"><input type="checkbox" id="anon" class="accent-temple-600"> Keep my name anonymous</label>
+      <button class="btn btn-gold w-full">🙏 Donate securely</button>
+      <p class="text-[11px] text-gray-500 text-center">Receipt issued instantly. 80G benefit available if the trust is registered.</p>
+    </form></aside>
+  </section>
+</main>
+<div id="site-footer"></div>
+<script>
+$('#hero').innerHTML = pageHero(t('donate'), '“Giving food is a virtue; giving it with love is the highest virtue.”', [[t('donate')]]);
+$('#causes').innerHTML = DONATIONS.map(d => { const pc = Math.round(d.raised / d.goal * 100); return `<div class="card overflow-hidden">${imgTag(d.img, 'w-full aspect-[16/9] object-cover', d.name)}<div class="p-5"><b class="text-temple-900">${esc(L(d, 'name', 'ta'))}</b><p class="text-sm text-gray-600 mt-1">${esc(d.desc)}</p>
+  <div class="mt-3 h-2 rounded-full bg-gray-100"><div class="h-2 rounded-full bg-gold-400" style="width:${Math.max(pc, 2)}%"></div></div><div class="flex justify-between text-xs mt-2"><span>${pc}% · ${rupee(d.raised)}</span><span>Goal ${rupee(d.goal)}</span></div>
+  <button data-c="${d.id}" class="btn btn-outline w-full mt-4 text-sm !py-2">Donate to this cause</button></div></div>`; }).join('');
+$('#cause').innerHTML = DONATIONS.map(d => `<option value="${d.id}">${esc(d.name)}</option>`).join('') + '<option value="general">General temple fund</option>';
+if (qs('cause')) $('#cause').value = qs('cause');
+$('#amts').innerHTML = [501, 1001, 2501, 5001].map(a => `<button type="button" data-a="${a}" class="rounded-xl border-2 border-gray-200 py-2 text-sm font-bold hover:border-gold-400">${rupee(a)}</button>`).join('');
+$$('[data-a]').forEach(b => b.onclick = () => { $('#amt').value = b.dataset.a; $$('[data-a]').forEach(x => x.classList.toggle('pkg-selected', x === b)); });
+if (qs('amount')) { $('#amt').value = +qs('amount'); $$('[data-a]').forEach(x => x.classList.toggle('pkg-selected', x.dataset.a === qs('amount'))); if (qs('cause')) setTimeout(() => $('#f').scrollIntoView({ behavior: 'smooth' }), 300); }
+$$('[data-c]').forEach(b => b.onclick = () => { $('#cause').value = b.dataset.c; $('#f').scrollIntoView({ behavior: 'smooth' }); });
+$('#n').value = user()?.name || ''; $('#m').value = user()?.mobile || '';
+function donate(cause, amount, extra = {}) {
+  const d = { id: genId('DN'), cause, amount, name: $('#n').value || user()?.name || 'Devotee', contact: $('#anon').checked ? 'Anonymous' : ($('#n').value || user()?.name), mobile: $('#m').value || user()?.mobile, pan: $('#pan').value, monthly: $('#monthly').checked, method: 'upi', created: new Date().toISOString(), ...extra };
+  const all = store.get('donations', []); all.unshift(d); store.set('donations', all);
+  modal(`<div class="p-8 text-center"><div class="text-6xl">🙏</div><h3 class="font-display text-2xl text-temple-900 mt-3">Thank you for your generosity</h3><p class="text-gray-600 mt-2">${rupee(amount)} towards ${esc(cause)}. May Sri Raja Kuberar bless your family.</p>
+    <a href="receipt.html?id=${d.id}&type=donation" target="_blank" class="btn btn-gold mt-5">🧾 Download receipt</a></div>`);
+}
+$('#f').onsubmit = e => { e.preventDefault(); donate($('#cause').selectedOptions[0].text, +$('#amt').value); };
+$('#sp-btn').onclick = () => { if (!$('#sp-date').value) return toast('Please choose a date'); if (!$('#n').value || !$('#m').value) { toast('Enter your name and mobile in the donation form'); return $('#n').focus(); }
+  donate(`Annadhanam sponsorship – ${$('#sp-occ').value} on ${fmtDate($('#sp-date').value)}`, +$('#sp-meals').value, { sponsorDate: $('#sp-date').value }); };
+</script>
+</body>
+</html>
