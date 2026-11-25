@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="utf-8"><meta name="referrer" content="no-referrer"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Sri Navapasana Raja Murugan – Online Pooja Booking, Live Darshan & Prasadam</title>
 <meta name="description" content="Book authentic Vedic poojas, homams and archanas at Sri Navapasana Raja Murugan Temple (Siddhar Peedam). Live streaming, video proof on WhatsApp and prasadam delivery.">
 <link rel="icon" href="assets/logo.svg" type="image/svg+xml"><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#5e1712">
@@ -70,15 +70,15 @@ $('#home').innerHTML = `
 
 <!-- ============ PANCHANGAM RIBBON ============ -->
 <section class="relative z-10 max-w-7xl mx-auto px-4 -mt-10 md:-mt-14">
-  <div class="rounded-[1.8rem] bg-ivory border border-sandal shadow-soft p-5 md:p-6 grid md:grid-cols-[auto_1fr_auto] gap-5 items-center reveal">
-    <div class="flex items-center gap-4 md:pr-6 md:border-r border-sandal">
+  <div class="rounded-[1.8rem] bg-ivory border border-sandal shadow-soft p-5 md:p-6 grid xl:grid-cols-[auto_1fr_auto] gap-5 items-center reveal">
+    <div class="flex items-center gap-4 xl:pr-6 xl:border-r border-sandal">
       <span class="w-14 h-14 rounded-2xl bg-gold-100 text-gold-700 grid place-items-center">${ic('sun', 'w-7 h-7')}</span>
       <div><p class="eyebrow">${t('todayPanchang')}</p><b class="font-display text-2xl text-temple-900">${new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}</b><p class="text-xs text-stone-500 font-tamil">${P.day_ta}</p></div>
     </div>
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 text-sm">
+    <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-x-5 gap-y-3 text-sm">
       ${[['Thithi', lang === 'ta' ? P.thithi_ta : P.thithi, ''], ['Nakshatra', lang === 'ta' ? P.nakshatra_ta : P.nakshatra, ''], ['Nalla Neram', P.nalla, 'text-emerald-700'], ['Rahu Kalam', P.rahu, 'text-temple-600'], ['Yamagandam', P.yama, 'text-temple-600'], ['Sunrise', P.sunrise + ' – ' + P.sunset, '']].map(c => `<div><p class="text-[11px] uppercase tracking-wider text-stone-500">${c[0]}</p><b class="${c[2] || 'text-temple-900'} font-semibold">${c[1]}</b></div>`).join('')}
     </div>
-    <a href="panchangam.html" class="btn btn-outline text-sm !py-2.5 justify-self-start md:justify-self-end">Full panchangam</a>
+    <a href="panchangam.html" class="btn btn-outline text-sm !py-2.5 justify-self-start xl:justify-self-end">Full panchangam</a>
   </div>
 </section>
 
